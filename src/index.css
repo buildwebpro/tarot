@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+body {
+  @apply antialiased;
+}
+
+.reading-section {
+  white-space: pre-line;
+  line-height: 1.2;
+}
+
+.reading-section h3 {
+  margin-top: 0.8rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.reading-section p {
+  margin-bottom: 0.8rem;
+}
+
+.reading-card {
+  margin-bottom: 0.8rem;
+  padding-left: 1rem;
+}
