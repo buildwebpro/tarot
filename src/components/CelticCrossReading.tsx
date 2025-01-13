@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shuffle, RotateCcw } from 'lucide-react';
+import { Shuffle, RotateCcw, Sparkles } from 'lucide-react';
 import { tarotDeck } from '../data/tarotDeck';
 import { TarotCard } from './TarotCard';
 import { saveReading } from '../utils/history';
@@ -24,18 +24,22 @@ export function CelticCrossReading() {
   const [isReversed, setIsReversed] = useState<boolean[]>([]);
   const [isReading, setIsReading] = useState(false);
 
-  const shuffleCards = () => {
-    const shuffled = [...tarotDeck]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 10);
-    
-    const reversedStates = Array(10).fill(false)
-      .map(() => Math.random() > 0.5);
+  const handleCardSelect = () => {
+    if (selectedCards.length >= 10) return;
 
-    setSelectedCards(shuffled);
-    setIsReversed(reversedStates);
+    const remainingCards = tarotDeck.filter(
+      card => !selectedCards.some(selected => selected.name === card.name)
+    );
+
+    const randomCard = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+    const isCardReversed = Math.random() > 0.5;
+
+    setSelectedCards([...selectedCards, randomCard]);
+    setIsReversed([...isReversed, isCardReversed]);
+  };
+
+  const startReading = () => {
     setIsReading(true);
-
     // บันทึกประวัติ
     saveReading({
       id: uuidv4(),
@@ -43,9 +47,9 @@ export function CelticCrossReading() {
       type: 'tarot',
       reading: 'Celtic Cross Reading',
       details: {
-        cards: shuffled.map((card, index) => ({
+        cards: selectedCards.map((card, index) => ({
           name: card.name,
-          isReversed: reversedStates[index]
+          isReversed: isReversed[index]
         }))
       }
     });
@@ -63,20 +67,31 @@ export function CelticCrossReading() {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-white">การทำนายไพ่ทาโรต์แบบ Celtic Cross</h2>
           <div className="space-x-4">
+            {selectedCards.length === 10 ? (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                onClick={startReading}
+                className="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors flex items-center"
+                disabled={isReading}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                เริ่มการทำนาย
+              </motion.button>
+            ) : (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                onClick={handleCardSelect}
+                className="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors flex items-center"
+                disabled={selectedCards.length >= 10}
+              >
+                เลือกไพ่ ({selectedCards.length}/10)
+              </motion.button>
+            )}
             <motion.button
-              whileHover={{ scale: 1.55 }}
-              onClick={shuffleCards}
-              className="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors flex items-center"
-              disabled={isReading}
-            >
-              <Shuffle className="mr-2 h-4 w-4" />
-              เริ่มการทำนาย
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.0 }}
+              whileHover={{ scale: 1.05 }}
               onClick={resetReading}
               className="px-6 py-3 bg-purple-700/50 rounded-lg hover:bg-purple-600/50 transition-colors flex items-center"
-              disabled={!isReading}
+              disabled={!isReading && selectedCards.length === 0}
             >
               <RotateCcw className="mr-2 h-4 w-4" />
               เริ่มใหม่
@@ -84,42 +99,59 @@ export function CelticCrossReading() {
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
-          {isReading ? (
-            <div className="relative grid grid-cols-6 grid-rows-5 gap-3 h-[600px] max-w-[1000px] mx-auto">
-              {POSITIONS.map((position, index) => (
-                <div
-                  key={index}
-                  className="relative w-full h-full flex items-center justify-center"
-                  style={{ 
-                    gridArea: position.gridArea,
-                    zIndex: position.zIndex || 0
-                  }}
-                >
-                  <div 
-                    className={`transform scale-[0.52] ${position.rotate ? 'rotate-90' : ''}`}
-                    style={{
-                      transformOrigin: 'center',
-                      position: 'absolute'
-                    }}
-                  >
-                    <TarotCard
-                      card={selectedCards[index]}
-                      isReversed={isReversed[index]}
-                      isRevealed={true}
-                    />
-                  </div>
-                  <div className="absolute -bottom-5 text-xs text-purple-200 text-center w-full">
-                    {position.name}
-                  </div>
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 mb-8">
+          {!isReading ? (
+            <div className="flex flex-wrap justify-center gap-4">
+              {selectedCards.map((card, index) => (
+                <div key={index} className="transform scale-[0.52]">
+                  <TarotCard
+                    card={card}
+                    isReversed={isReversed[index]}
+                    isRevealed={true}
+                  />
                 </div>
               ))}
+              {selectedCards.length < 10 && (
+                <motion.div
+                  className="w-48 h-72 bg-purple-700/50 rounded-xl border-2 border-purple-400/50 flex items-center justify-center text-purple-200 cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                  onClick={handleCardSelect}
+                >
+                  คลิกเพื่อเลือกไพ่
+                </motion.div>
+              )}
             </div>
           ) : (
-            <div className="text-center py-32">
-              <p className="text-xl text-purple-200">
-                กดปุ่ม "เริ่มการทำนาย" เพื่อเริ่มการทำนายไพ่ทาโรต์
-              </p>
+            <div className="flex justify-center items-center min-h-[800px]">
+              <div className="relative grid grid-cols-6 grid-rows-5 gap-4 w-[900px] h-[700px]">
+                {POSITIONS.map((position, index) => (
+                  <div
+                    key={index}
+                    className="relative w-full h-full flex items-center justify-center"
+                    style={{ 
+                      gridArea: position.gridArea,
+                      zIndex: position.zIndex || 0
+                    }}
+                  >
+                    <div 
+                      className={`transform scale-[0.48] ${position.rotate ? 'rotate-90' : ''}`}
+                      style={{
+                        transformOrigin: 'center',
+                        position: 'absolute'
+                      }}
+                    >
+                      <TarotCard
+                        card={selectedCards[index]}
+                        isReversed={isReversed[index]}
+                        isRevealed={true}
+                      />
+                    </div>
+                    <div className="absolute -bottom-5 text-xs text-purple-200 text-center w-full">
+                      {position.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -21,7 +21,7 @@ const specialImageMap: { [key: string]: string } = {
   'King of Wands': 'waki',
   'Queen of Wands': 'waqu',
   'Knight of Wands': 'wakn',
-  'Page of Wands': 'wapu',
+  'Page of Wands': 'wapa',
 };
 
 // ฟังก์ชันแปลงชื่อไพ่เป็นรหัสรูปภาพ
