@@ -1,4 +1,6 @@
 import { dailyPredictions } from '../data/horoscope/dailyPredictions';
+import { saveReading } from './history';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function getDailyHoroscope(sign: string): Promise<string> {
   try {
@@ -15,7 +17,7 @@ export async function getDailyHoroscope(sign: string): Promise<string> {
     const luckyNumber = randomPrediction(predictions.lucky.numbers);
     const luckyTime = randomPrediction(predictions.lucky.times);
 
-    return `
+    const reading = `
 💘 ด้านความรัก
 ${randomPrediction(predictions.love)}
 
@@ -33,6 +35,19 @@ ${randomPrediction(predictions.health)}
 🔢 เลขนำโชค: ${luckyNumber}
 ⏰ เวลามงคล: ${luckyTime}
     `;
+
+    // บันทึกประวัติ
+    saveReading({
+      id: uuidv4(),
+      timestamp: new Date().toISOString(),
+      type: 'zodiac',
+      reading,
+      details: {
+        sign
+      }
+    });
+
+    return reading;
   } catch (error) {
     console.error('Error generating horoscope:', error);
     return 'ขออภัย ไม่สามารถดูดวงได้ในขณะนี้';
