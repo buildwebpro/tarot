@@ -13,6 +13,8 @@ import { Helmet } from 'react-helmet';
 import { ReadingHistory } from './components/ReadingHistory';
 import { saveReading } from './utils/history';
 import { v4 as uuidv4 } from 'uuid';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 
 function App() {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
@@ -120,71 +122,75 @@ function App() {
       </Helmet>
       
       <div className="min-h-screen bg-gradient-to-b from-purple-900 via-purple-800 to-indigo-900 text-white">
-        <div className="container mx-auto px-4 py-8">
-          <section className="mb-16">
-            <header className="text-center mb-12">
-              <h1 className="text-4xl font-bold mb-4">
-                <Sparkles className="w-8 h-8 inline-block mr-2" />
-                ดูดวงไพ่ทาโรต์
-              </h1>
-              <p className="text-lg text-purple-200">เลือกไพ่ 3 ใบเพื่อทำนายดวงชะตา</p>
-            </header>
-            
-            <div className="flex flex-col items-center gap-8">
-              <div className="flex flex-wrap justify-center gap-8">
-                {selectedCards.map((card, index) => (
-                  <TarotCard
-                    key={card.name}
-                    card={card}
-                    isReversed={isReversed[index]}
-                    isRevealed={true}
-                  />
-                ))}
-                {selectedCards.length < 3 && (
-                  <motion.button
-                    className="w-64 h-96 bg-purple-700/50 rounded-xl border-2 border-purple-400/50 flex items-center justify-center text-purple-200 hover:bg-purple-700/60 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    onClick={handleCardSelect}
+        <Header />
+        
+        <main className="container mx-auto px-4 py-8">
+          <section id="tarot" className="mb-16">
+            <section className="mb-16">
+              <header className="text-center mb-12">
+                <h1 className="text-4xl font-bold mb-4">
+                  <Sparkles className="w-8 h-8 inline-block mr-2" />
+                  ดูดวงไพ่ทาโรต์
+                </h1>
+                <p className="text-lg text-purple-200">เลือกไพ่ 3 ใบเพื่อทำนายดวงชะตา</p>
+              </header>
+              
+              <div className="flex flex-col items-center gap-8">
+                <div className="flex flex-wrap justify-center gap-8">
+                  {selectedCards.map((card, index) => (
+                    <TarotCard
+                      key={card.name}
+                      card={card}
+                      isReversed={isReversed[index]}
+                      isRevealed={true}
+                    />
+                  ))}
+                  {selectedCards.length < 3 && (
+                    <motion.button
+                      className="w-64 h-96 bg-purple-700/50 rounded-xl border-2 border-purple-400/50 flex items-center justify-center text-purple-200 hover:bg-purple-700/60 transition-colors"
+                      whileHover={{ scale: 1.05 }}
+                      onClick={handleCardSelect}
+                    >
+                      คลิกเพื่อเปิดไพ่
+                    </motion.button>
+                  )}
+                </div>
+
+                {reading && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg p-6 rounded-xl text-center"
                   >
-                    คลิกเพื่อเปิดไพ่
+                    <h2 className="text-2xl font-semibold mb-4">คำทำนายของคุณ</h2>
+                    <p className="text-lg leading-relaxed text-purple-100 whitespace-pre-line">
+                      {reading}
+                    </p>
+                  </motion.div>
+                )}
+
+                {selectedCards.length === 3 && (
+                  <motion.button
+                    className="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    onClick={handleReset}
+                  >
+                    เริ่มทำนายใหม่(อย่าใช้มากกว่า 2 ครั้ง เพื่อความแม่นยำ)
                   </motion.button>
                 )}
+
+                {isLoading && (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce" />
+                    <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  </div>
+                )}
               </div>
-
-              {reading && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg p-6 rounded-xl text-center"
-                >
-                  <h2 className="text-2xl font-semibold mb-4">คำทำนายของคุณ</h2>
-                  <p className="text-lg leading-relaxed text-purple-100 whitespace-pre-line">
-                    {reading}
-                  </p>
-                </motion.div>
-              )}
-
-              {selectedCards.length === 3 && (
-                <motion.button
-                  className="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  onClick={handleReset}
-                >
-                  เริ่มทำนายใหม่(อย่าใช้มากกว่า 2 ครั้ง เพื่อความแม่นยำ)
-                </motion.button>
-              )}
-
-              {isLoading && (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce" />
-                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce [animation-delay:0.4s]" />
-                </div>
-              )}
-            </div>
+            </section>
           </section>
 
-          <section className="pt-16 border-t border-purple-500/30">
+          <section id="horoscope" className="pt-16 border-t border-purple-500/30">
             <header className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">ดูดวงรายวันตามราศี</h2>
               <p className="text-lg text-purple-200">เลือกราศีของคุณเพื่อดูคำทำนายประจำวัน</p>
@@ -220,8 +226,12 @@ function App() {
             />
           )}
 
-          <ReadingHistory />
-        </div>
+          <section id="history">
+            <ReadingHistory />
+          </section>
+        </main>
+
+        <Footer />
       </div>
     </div>
   );
