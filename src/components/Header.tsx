@@ -32,6 +32,11 @@ export function Header() {
                 </a>
               </li>
               <li>
+                <a href="#celtic-cross" className="text-purple-200 hover:text-white transition-colors">
+                  ดูไพ่10ใบ
+                </a>
+              </li>
+              <li>
                 <a href="#horoscope" className="text-purple-200 hover:text-white transition-colors">
                   ดูดวงรายวัน
                 </a>
