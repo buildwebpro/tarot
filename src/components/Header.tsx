@@ -3,7 +3,7 @@ import { Sun } from 'lucide-react';
 
 export function Header() {
   return (
-    <header className="border-b border-purple-500/30">
+    <header className="sticky top-0 z-50 bg-purple-900/80 backdrop-blur-sm border-b border-gray-500/30">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <motion.div 
@@ -16,7 +16,7 @@ export function Header() {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-200 to-purple-400 bg-clip-text text-transparent">
-                รุทสะกิดดาว
+               <a href="/">รุทสะกิดดาว</a>
               </h1>
               <p className="text-purple-300 text-sm">
                 ทำนายชะตาชีวิตด้วยไพ่ทาโรต์และดูดวงรายวัน
@@ -27,8 +27,8 @@ export function Header() {
           <nav>
             <ul className="flex gap-6">
               <li>
-                <a href="#basic-reading" className="text-purple-200 hover:text-white transition-colors">
-                  ไพ่พื้นฐาน
+                <a href="#tarot" className="text-purple-200 hover:text-white transition-colors">
+                  ไพ่เสี่ยงทาย
                 </a>
               </li>
               <li>
@@ -39,11 +39,6 @@ export function Header() {
               <li>
                 <a href="#celtic-cross" className="text-purple-200 hover:text-white transition-colors">
                   Celtic Cross
-                </a>
-              </li>
-              <li>
-                <a href="#tarot" className="text-purple-200 hover:text-white transition-colors">
-                  ไพ่ทาโรต์
                 </a>
               </li>
               <li>

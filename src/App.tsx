@@ -195,7 +195,7 @@ function App() {
               <SpecializedReading />
             </section>
 
-            <section className="pt-16 border-t border-purple-500/30">
+            <section id="celtic-cross" className="pt-16 border-t border-purple-500/30">
               <CelticCrossReading />
             </section>
           </section>
