@@ -1,11 +1,25 @@
-export type Card = {
+export interface Card {
   name: string;
   image: string;
   meaning: {
-    upright: string[];
-    reversed: string[];
+    love: {
+      upright: string;
+      reversed: string;
+    };
+    career: {
+      upright: string;
+      reversed: string;
+    };
+    finance: {
+      upright: string;
+      reversed: string;
+    };
+    health: {
+      upright: string;
+      reversed: string;
+    };
   };
-};
+}
 
 export interface Reading {
   cards: Card[];

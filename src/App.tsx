@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CelticCrossReading } from './components/CelticCrossReading';
+import { SpecializedReading } from './components/SpecializedReading';
 
 function App() {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
@@ -188,6 +189,10 @@ function App() {
                   </div>
                 )}
               </div>
+            </section>
+
+            <section className="pt-16 border-t border-purple-500/30">
+              <SpecializedReading />
             </section>
 
             <section className="pt-16 border-t border-purple-500/30">

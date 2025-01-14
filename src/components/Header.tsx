@@ -27,6 +27,21 @@ export function Header() {
           <nav>
             <ul className="flex gap-6">
               <li>
+                <a href="#basic-reading" className="text-purple-200 hover:text-white transition-colors">
+                  ไพ่พื้นฐาน
+                </a>
+              </li>
+              <li>
+                <a href="#specialized-reading" className="text-purple-200 hover:text-white transition-colors">
+                  ไพ่เฉพาะด้าน
+                </a>
+              </li>
+              <li>
+                <a href="#celtic-cross" className="text-purple-200 hover:text-white transition-colors">
+                  Celtic Cross
+                </a>
+              </li>
+              <li>
                 <a href="#tarot" className="text-purple-200 hover:text-white transition-colors">
                   ไพ่ทาโรต์
                 </a>
