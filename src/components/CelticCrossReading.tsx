@@ -182,7 +182,7 @@ export function CelticCrossReading() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/10 backdrop-blur-sm rounded-xl p-6"
           >
-            <h3 className="text-xl font-bold text-white mb-3">คำทำนายจาก AI</h3>
+            <h3 className="text-xl font-bold text-white mb-3">คำทำนายจากไพ่</h3>
 
             {isLoadingAI ? (
               <div className="flex items-center justify-center py-8">

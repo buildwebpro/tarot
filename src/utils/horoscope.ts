@@ -1,5 +1,7 @@
 import { dailyPredictions } from '../data/horoscope/dailyPredictions';
+import { zodiacSigns } from '../data/zodiac';
 import { saveReading } from './history';
+import { generateHoroscopeReading } from './aiHoroscope';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function getDailyHoroscope(sign: string): Promise<string> {
@@ -9,15 +11,43 @@ export async function getDailyHoroscope(sign: string): Promise<string> {
       throw new Error('ไม่พบข้อมูลสำหรับราศีนี้');
     }
 
-    // สุ่มเลือกคำทำนายจากแต่ละหมวด
-    const randomPrediction = (arr: string[]) => 
-      arr[Math.floor(Math.random() * arr.length)];
+    // ดึงข้อมูลราศีจาก zodiac
+    const zodiacSign = zodiacSigns.find(z => z.name === sign);
+    const thaiName = zodiacSign?.thaiName || sign;
+    const element = zodiacSign?.element || '';
 
-    const luckyColor = randomPrediction(predictions.lucky.colors);
-    const luckyNumber = randomPrediction(predictions.lucky.numbers);
-    const luckyTime = randomPrediction(predictions.lucky.times);
+    // เรียก AI ทำนาย
+    const reading = await generateHoroscopeReading(sign, thaiName, element);
 
-    const reading = `
+    // บันทึกประวัติ
+    saveReading({
+      id: uuidv4(),
+      timestamp: new Date().toISOString(),
+      type: 'zodiac',
+      reading,
+      details: {
+        sign,
+        thaiName
+      }
+    });
+
+    return reading;
+  } catch (error) {
+    console.error('Error generating horoscope:', error);
+
+    // ถ้า AI ไม่ได้ ใช้ fallback ของเดิม
+    try {
+      const predictions = dailyPredictions[sign];
+      const zodiacSign = zodiacSigns.find(z => z.name === sign);
+
+      const randomPrediction = (arr: string[]) =>
+        arr[Math.floor(Math.random() * arr.length)];
+
+      const luckyColor = randomPrediction(predictions.lucky.colors);
+      const luckyNumber = randomPrediction(predictions.lucky.numbers);
+      const luckyTime = randomPrediction(predictions.lucky.times);
+
+      const fallbackReading = `
 💘 ด้านความรัก
 ${randomPrediction(predictions.love)}
 
@@ -34,22 +64,22 @@ ${randomPrediction(predictions.health)}
 🎨 สีมงคล: ${luckyColor}
 🔢 เลขนำโชค: ${luckyNumber}
 ⏰ เวลามงคล: ${luckyTime}
-    `;
+      `;
 
-    // บันทึกประวัติ
-    saveReading({
-      id: uuidv4(),
-      timestamp: new Date().toISOString(),
-      type: 'zodiac',
-      reading,
-      details: {
-        sign
-      }
-    });
+      saveReading({
+        id: uuidv4(),
+        timestamp: new Date().toISOString(),
+        type: 'zodiac',
+        reading: fallbackReading,
+        details: {
+          sign,
+          thaiName: zodiacSign?.thaiName
+        }
+      });
 
-    return reading;
-  } catch (error) {
-    console.error('Error generating horoscope:', error);
-    return 'ขออภัย ไม่สามารถดูดวงได้ในขณะนี้';
+      return fallbackReading;
+    } catch (fallbackError) {
+      return 'ขออภัย ไม่สามารถดูดวงได้ในขณะนี้';
+    }
   }
-} 
+}
