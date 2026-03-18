@@ -68,14 +68,14 @@ export function HoroscopeModal({ sign, onClose }: HoroscopeModalProps) {
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-gradient-to-br from-purple-800 to-purple-900 rounded-xl p-8 max-w-2xl w-full shadow-xl"
+          className="bg-gradient-to-br from-purple-800 to-purple-900 rounded-xl p-8 max-w-2xl w-full shadow-xl max-h-[80vh] flex flex-col"
           onClick={e => e.stopPropagation()}
         >
-          <div className="flex items-center gap-6 mb-8">
+          <div className="flex items-center gap-6 mb-4">
             <div className="bg-purple-700/50 p-4 rounded-xl">
-              <img 
-                src={zodiacSign?.image} 
-                alt={zodiacSign?.name} 
+              <img
+                src={zodiacSign?.image}
+                alt={zodiacSign?.name}
                 className="w-20 h-20 object-contain"
               />
             </div>
@@ -86,15 +86,15 @@ export function HoroscopeModal({ sign, onClose }: HoroscopeModalProps) {
             </div>
           </div>
 
-          <div className="prose prose-invert max-w-none">
-            <div className="bg-purple-700/30 backdrop-blur-sm rounded-lg p-6 mb-6">
+          <div className="prose prose-invert max-w-none flex-1 overflow-y-auto">
+            <div className="bg-purple-700/30 backdrop-blur-sm rounded-lg p-4">
               <p className="text-lg leading-relaxed whitespace-pre-line">
                 {horoscope}
               </p>
             </div>
           </div>
 
-          <div className="flex justify-end mt-8">
+          <div className="flex justify-end mt-4 pt-4 border-t border-purple-700">
             <button
               onClick={onClose}
               className="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
