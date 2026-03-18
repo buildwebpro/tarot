@@ -10,7 +10,6 @@ import { DailyHoroscope } from './components/DailyHoroscope';
 import { zodiacSigns } from './data/zodiac';
 import { HoroscopeModal } from './components/HoroscopeModal';
 import { Helmet } from 'react-helmet';
-import { ReadingHistory } from './components/ReadingHistory';
 import { saveReading } from './utils/history';
 import { v4 as uuidv4 } from 'uuid';
 import { Header } from './components/Header';
@@ -234,10 +233,6 @@ function App() {
               onClose={() => setSelectedSign(null)}
             />
           )}
-
-          <section id="history">
-            <ReadingHistory />
-          </section>
         </main>
 
         <Footer />
