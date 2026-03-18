@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { RotateCcw, Sparkles } from 'lucide-react';
+import { RotateCcw, Sparkles, Loader2 } from 'lucide-react';
 import { tarotDeck } from '../data/tarotDeck';
 import { TarotCard } from './TarotCard';
 import { saveReading } from '../utils/history';
+import { generateTarotReading } from '../utils/openrouter';
 import { v4 as uuidv4 } from 'uuid';
 
 const POSITIONS = [
@@ -23,6 +24,8 @@ export function CelticCrossReading() {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [isReversed, setIsReversed] = useState<boolean[]>([]);
   const [isReading, setIsReading] = useState(false);
+  const [aiReading, setAiReading] = useState<string>('');
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   const handleCardSelect = () => {
     if (selectedCards.length >= 10) return;
@@ -38,8 +41,12 @@ export function CelticCrossReading() {
     setIsReversed([...isReversed, isCardReversed]);
   };
 
-  const startReading = () => {
+  const startReading = async () => {
     setIsReading(true);
+    setIsLoadingAI(true);
+    setAiReading('');
+
+    // บันทึกประวัติ
     saveReading({
       id: uuidv4(),
       timestamp: new Date().toISOString(),
@@ -48,16 +55,30 @@ export function CelticCrossReading() {
       details: {
         cards: selectedCards.map((card, index) => ({
           name: card.name,
+          position: POSITIONS[index].name,
           isReversed: isReversed[index]
         }))
       }
     });
+
+    // เรียก AI ทำนาย
+    const cardsData = selectedCards.map((card, index) => ({
+      name: card.name,
+      position: POSITIONS[index].name,
+      isReversed: isReversed[index]
+    }));
+
+    const result = await generateTarotReading(cardsData);
+    setAiReading(result);
+    setIsLoadingAI(false);
   };
 
   const resetReading = () => {
     setSelectedCards([]);
     setIsReversed([]);
     setIsReading(false);
+    setAiReading('');
+    setIsLoadingAI(false);
   };
 
   return (
@@ -161,20 +182,34 @@ export function CelticCrossReading() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/10 backdrop-blur-sm rounded-xl p-6"
           >
-            <h3 className="text-xl font-bold text-white mb-3">ความหมายของไพ่</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {selectedCards.map((card, index) => (
-                <div key={index} className="p-3 bg-purple-800/50 rounded-lg">
-                  <h4 className="font-bold text-base text-purple-200">
-                    {POSITIONS[index].name} - {card.name}
-                    {isReversed[index] ? ' (กลับหัว)' : ''}
-                  </h4>
-                  <p className="mt-1 text-sm text-purple-300">
-                    {isReversed[index] ? card.meaning.reversed : card.meaning.upright}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <h3 className="text-xl font-bold text-white mb-3">คำทำนายจาก AI</h3>
+
+            {isLoadingAI ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="animate-spin h-8 w-8 text-purple-400 mr-3" />
+                <span className="text-purple-200">กำลังทำนาย...</span>
+              </div>
+            ) : aiReading ? (
+              <div className="bg-purple-800/30 rounded-lg p-4">
+                <p className="text-purple-100 whitespace-pre-wrap leading-relaxed">
+                  {aiReading}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {selectedCards.map((card, index) => (
+                  <div key={index} className="p-3 bg-purple-800/50 rounded-lg">
+                    <h4 className="font-bold text-base text-purple-200">
+                      {POSITIONS[index].name} - {card.name}
+                      {isReversed[index] ? ' (กลับหัว)' : ''}
+                    </h4>
+                    <p className="mt-1 text-sm text-purple-300">
+                      {isReversed[index] ? card.meaning.reversed : card.meaning.upright}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </div>
