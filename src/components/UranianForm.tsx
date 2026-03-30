@@ -133,7 +133,7 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
             </p>
             <div className="mt-4 flex items-center justify-center gap-2 text-sm text-amber-300">
               <Lock className="w-4 h-4" />
-              <span>ฟรี 1 ครั้ง | ต้องเข้าสู่ระบบ</span>
+              <span>1 เครดิต = 1 ครั้ง | ต้องเข้าสู่ระบบ</span>
             </div>
           </div>
 
@@ -255,9 +255,10 @@ function PremiumModal({ onClose, freeReadingsCount }: PremiumModalProps) {
             <div className="bg-purple-800/50 rounded-lg p-4 text-left">
               <h4 className="font-semibold mb-2 text-amber-300">แพ็กเกจเครดิต:</h4>
               <ul className="text-sm text-purple-200 space-y-1">
-                <li>• 5 ครั้ง - 100 บาท</li>
-                <li>• 10 ครั้ง - 180 บาท</li>
-                <li>• 20 ครั้ง - 320 บาท</li>
+                <li>• 1 เครดิต = 200 บาท</li>
+                <li>• โหราศาสตร์ยูเรเนียน 1 ครั้ง = 1 เครดิต</li>
+                <li>• ไพ่ทาโรต์ - ดูฟรี</li>
+                <li>• ดูดวงรายวัน - ดูฟรี</li>
               </ul>
             </div>
 

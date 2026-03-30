@@ -35,3 +35,9 @@ node scripts/init-admin.js
 ```bash
 firebase deploy --only firestore:rules
 ```
+
+## ราคาบริการ
+
+- โหราศาสตร์ยูเรเนียน: 1 เครดิต = 200 บาท (1 ครั้ง = 1 เครดิต)
+- ไพ่ทาโรต์: ดูฟรี
+- ดูดวงรายวัน: ดูฟรี

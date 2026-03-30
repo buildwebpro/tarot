@@ -201,9 +201,10 @@ export default function ProfilePage() {
               เติมเครดิต
             </h2>
             <ul className="text-purple-200 space-y-2 mb-4 text-sm">
-              <li>• 5 ครั้ง - 100 บาท</li>
-              <li>• 10 ครั้ง - 180 บาท</li>
-              <li>• 20 ครั้ง - 320 บาท</li>
+              <li>• 1 เครดิต = 200 บาท</li>
+              <li>• ดูโหราศาสตร์ยูเรเนียน 1 ครั้ง = 1 เครดิต</li>
+              <li>• ไพ่ทาโรต์ - ดูฟรี</li>
+              <li>• ดูดวงรายวัน - ดูฟรี</li>
             </ul>
             <p className="text-purple-300 text-sm mb-4">
               ติดต่อ Line: 0942511969 เพื่อเติมเครดิต
