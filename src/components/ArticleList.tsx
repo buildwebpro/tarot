@@ -6,11 +6,19 @@ import type { Article } from '../types/firebase';
 import { ArticleModal } from './ArticleModal';
 import { getAllDemoArticles } from '../data/articles';
 
+const CATEGORIES = [
+  { value: 'all', label: 'ทั้งหมด' },
+  { value: 'tarot', label: 'ไพ่ทาโรต์' },
+  { value: 'uranian', label: 'ยูเรเนียน' },
+  { value: 'zodiac', label: 'ดูดวงราศี' },
+  { value: 'general', label: 'ทั่วไป' },
+];
+
 export function ArticleList() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [filter, setFilter] = useState<'all' | 'free'>('all');
+  const [filter, setFilter] = useState<string>('all');
 
   useEffect(() => {
     loadArticles();
@@ -35,8 +43,8 @@ export function ArticleList() {
   };
 
   const filteredArticles = articles.filter(article => {
-    if (filter === 'free') return !article.isPremium;
-    return true;
+    if (filter === 'all') return true;
+    return article.category === filter;
   });
 
   if (loading) {
@@ -54,18 +62,18 @@ export function ArticleList() {
   return (
     <div>
       {/* Filter Buttons */}
-      <div className="flex gap-2 mb-8">
-        {(['all', 'free'] as const).map(f => (
+      <div className="flex gap-2 mb-8 flex-wrap">
+        {CATEGORIES.map(cat => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
+            key={cat.value}
+            onClick={() => setFilter(cat.value)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === f
+              filter === cat.value
                 ? 'bg-stardust-600 text-deep-950'
                 : 'bg-cosmic-900/50 text-cosmic-300 hover:bg-cosmic-800/50 border border-cosmic-700/50'
             }`}
           >
-            {f === 'all' ? 'ทั้งหมด' : 'ฟรี'}
+            {cat.label}
           </button>
         ))}
       </div>
