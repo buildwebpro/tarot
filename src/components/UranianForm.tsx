@@ -3,8 +3,8 @@ import { Sparkles, Lock, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getUranianReading } from '../utils/uranian';
 import { useAuth } from '../contexts/AuthContext';
-import { authService } from '../services/firebase';
 import { historyService } from '../services/firestore';
+import { usersService } from '../services/users';
 
 interface UranianFormProps {
   onReadingComplete?: (reading: string) => void;
@@ -27,7 +27,7 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
       return false;
     }
 
-    if (!isPremium && (userProfile?.freeReadingsCount || 0) >= 1) {
+    if (!isPremium && (userProfile?.credits || 0) < 1) {
       setShowPremiumModal(true);
       return false;
     }
@@ -71,8 +71,10 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
           isPremium: false,
         });
 
-        // Increment free readings count
-        await authService.incrementFreeReadings(user.uid);
+        // Deduct credit if not premium
+        if (!isPremium) {
+          await usersService.deductCredit(user.uid);
+        }
         await refreshProfile();
       }
     } catch (err: any) {
@@ -241,40 +243,24 @@ function PremiumModal({ onClose, freeReadingsCount }: PremiumModalProps) {
       >
         <div className="text-center">
           <Lock className="w-16 h-16 mx-auto mb-4 text-amber-400" />
-          <h3 className="text-2xl font-bold mb-4">อัพเกรดเป็น Premium</h3>
-          
-          {freeReadingsCount >= 1 ? (
-            <p className="text-purple-200 mb-6">
-              คุณได้ใช้คำทำนายฟรีครบ 1 ครั้งแล้ว
-              <br />
-              อัพเกรดเป็น Premium เพื่อทำนายได้ไม่จำกัด!
-            </p>
-          ) : (
-            <p className="text-purple-200 mb-6">
-              เข้าสู่ระบบเพื่อรับคำทำนายฟรี 1 ครั้ง
-              <br />
-              หรืออัพเกรดเป็น Premium เพื่อใช้งานไม่จำกัด
-            </p>
-          )}
+          <h3 className="text-2xl font-bold mb-4">เติมเครดิต</h3>
+
+          <p className="text-purple-200 mb-6">
+            คุณไม่มีเครดิตในการทำนาย
+            <br />
+            ติดต่อ Line: 0942511969 เพื่อเติมเครดิต
+          </p>
 
           <div className="space-y-3">
             <div className="bg-purple-800/50 rounded-lg p-4 text-left">
-              <h4 className="font-semibold mb-2 text-amber-300">สิทธิพิเศษ Premium:</h4>
+              <h4 className="font-semibold mb-2 text-amber-300">แพ็กเกจเครดิต:</h4>
               <ul className="text-sm text-purple-200 space-y-1">
-                <li>✓ ทำนายยูเรเนียนไม่จำกัด</li>
-                <li>✓ ดูประวัติการทำนายทั้งหมด</li>
-                <li>✓ บทความโหราศาสตร์พรีเมียม</li>
-                <li>✓ คำทำนายละเอียดพิเศษ</li>
+                <li>• 5 ครั้ง - 100 บาท</li>
+                <li>• 10 ครั้ง - 180 บาท</li>
+                <li>• 20 ครั้ง - 320 บาท</li>
               </ul>
             </div>
 
-            <button
-              onClick={onClose}
-              className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 rounded-lg font-semibold transition-colors"
-            >
-              อัพเกรดตอนนี้
-            </button>
-            
             <button
               onClick={onClose}
               className="w-full py-3 text-purple-300 hover:text-white transition-colors text-sm"

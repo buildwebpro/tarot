@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, Crown, ChevronDown } from 'lucide-react';
+import { Menu, X, User, LogOut, Crown, ChevronDown, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const { user, isPremium, logout } = useAuth();
+  const { user, isPremium, isAdmin, logout } = useAuth();
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -140,6 +140,14 @@ export function Header() {
 
             <Link to="/articles" className={navLinkClass('/articles')}>บทความ</Link>
             <Link to="/history" className={navLinkClass('/history')}>ประวัติ</Link>
+            {isAdmin && (
+              <Link to="/admin" className={navLinkClass('/admin')}>
+                <span className="flex items-center gap-1">
+                  <Shield className="w-4 h-4 text-amber-400" />
+                  จัดการ
+                </span>
+              </Link>
+            )}
 
             {/* CTA + Auth */}
             <div className="flex items-center gap-3 ml-4">
@@ -226,6 +234,11 @@ export function Header() {
                 <Link to="/history" className="block px-3 py-2.5 rounded-lg text-cosmic-100 hover:bg-cosmic-800/50 hover:text-stardust-300 font-medium text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
                   📋 ประวัติ
                 </Link>
+                {isAdmin && (
+                  <Link to="/admin" className="block px-3 py-2.5 rounded-lg text-amber-400 hover:bg-cosmic-800/50 hover:text-amber-300 font-medium text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    🛡️ จัดการระบบ
+                  </Link>
+                )}
               </div>
 
               <div className="border-t border-cosmic-800/50 mt-3 pt-3">

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npx update-browserslist-db@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(sed:*)",
+      "WebSearch",
+      "WebFetch(domain:www.biddytarot.com)",
+      "WebFetch(domain:www.tarot.com)",
+      "WebFetch(domain:www.learntarot.com)",
+      "WebFetch(domain:www.keen.com)",
+      "WebFetch(domain:www.thetarotguide.com)",
+      "WebFetch(domain:www.astrology.com)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)"
+    ]
+  }
+}

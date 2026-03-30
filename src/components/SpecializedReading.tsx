@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Briefcase, Coins, Activity, Sparkles } from 'lucide-react';
 import { TarotCard } from './TarotCard';
@@ -47,7 +47,6 @@ export function SpecializedReading() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [isReversed, setIsReversed] = useState<boolean[]>([]);
-  const [isReading, setIsReading] = useState(false);
 
   const currentType = selectedType ? readingTypes.find(t => t.id === selectedType) : null;
 
@@ -55,7 +54,6 @@ export function SpecializedReading() {
     setSelectedType(typeId);
     setSelectedCards([]);
     setIsReversed([]);
-    setIsReading(false);
   };
 
   const handleCardSelect = () => {
@@ -78,7 +76,7 @@ export function SpecializedReading() {
     saveReading({
       id: uuidv4(),
       timestamp: new Date().toISOString(),
-      type: 'tarot_specialized',
+      type: 'tarot',
       reading: `การทำนายเฉพาะด้าน: ${readingTypes.find(t => t.id === selectedType)?.name}`,
       details: {
         cards: selectedCards.map((card, index) => ({
@@ -94,7 +92,6 @@ export function SpecializedReading() {
     setSelectedType(null);
     setSelectedCards([]);
     setIsReversed([]);
-    setIsReading(false);
   };
 
   useEffect(() => {
@@ -104,34 +101,29 @@ export function SpecializedReading() {
   }, [selectedCards.length, currentType]);
 
   return (
-    <div className="w-full py-12" id="specialized-reading">
-      <div className="max-w-6xl mx-auto px-4">
-        <header className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">
-            <Sparkles className="w-8 h-8 inline-block mr-2" />
-            ดูดวงไพ่ทาโรต์เฉพาะด้าน
-          </h2>
-          <p className="text-lg text-purple-200">เลือกประเภทการทำนายที่ต้องการ</p>
-        </header>
-        
+    <div className="w-full" id="specialized">
+      <div className="max-w-6xl mx-auto">
         {/* เลือกประเภทการทำนาย */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
           {readingTypes.map((type) => {
             const Icon = type.icon;
             return (
               <motion.button
                 key={type.id}
                 onClick={() => handleSelectType(type.id)}
-                className={`relative overflow-hidden rounded-xl p-6 text-left transition-all
+                className={`relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 border
                   ${selectedType === type.id 
-                    ? `bg-gradient-to-r ${type.color} text-white`
-                    : 'bg-white/10 hover:bg-white/20'
+                    ? `bg-gradient-to-br ${type.color} text-white border-transparent shadow-lg scale-[1.02]`
+                    : 'glass-card border-cosmic-700/50 hover:border-stardust-500/50 hover:bg-cosmic-800/60 text-cosmic-200 hover:text-stardust-300 group'
                   }`}
-                whileHover={{ scale: 1.02 }}
+                whileHover={selectedType !== type.id ? { scale: 1.02, y: -2 } : {}}
+                whileTap={{ scale: 0.98 }}
               >
-                <Icon className="w-8 h-8 mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{type.name}</h3>
-                <p className="text-sm opacity-80">{type.description}</p>
+                <div className="relative z-10">
+                  <Icon className={`w-8 h-8 mb-4 ${selectedType === type.id ? 'text-white' : 'text-cosmic-400 group-hover:text-stardust-300 transition-colors'}`} />
+                  <h3 className={`text-xl font-bold mb-2 font-display tracking-wide ${selectedType === type.id ? 'text-white' : 'text-white transition-colors'}`}>{type.name}</h3>
+                  <p className={`text-sm leading-relaxed ${selectedType === type.id ? 'text-white/90' : 'text-cosmic-300 transition-colors'}`}>{type.description}</p>
+                </div>
               </motion.button>
             );
           })}
@@ -142,27 +134,31 @@ export function SpecializedReading() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-8"
+            className="w-full max-w-4xl mx-auto glass-panel p-6 sm:p-10 border border-cosmic-700/50 shadow-2xl relative overflow-hidden"
           >
-            <div className="flex flex-wrap justify-center gap-6">
-              {selectedCards.map((card, index) => (
-                <TarotCard
-                  key={index}
-                  card={card}
-                  isReversed={isReversed[index]}
-                  isRevealed={true}
-                />
-              ))}
-              {selectedCards.length < (currentType?.cards || 0) && (
-                <motion.button
-                  onClick={handleCardSelect}
-                  className="w-64 h-96 bg-purple-700/50 rounded-xl border-2 border-purple-400/50
-                    flex items-center justify-center text-purple-200 hover:bg-purple-700/60"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  เลือกไพ่
-                </motion.button>
-              )}
+            <div className="flex flex-col items-center gap-12">
+              <div className="flex flex-wrap justify-center gap-6 sm:gap-8 w-full">
+                {selectedCards.map((card, index) => (
+                  <TarotCard
+                    key={index}
+                    card={card}
+                    isReversed={isReversed[index]}
+                    isRevealed={true}
+                  />
+                ))}
+                {selectedCards.length < (currentType?.cards || 0) && (
+                  <motion.button
+                    onClick={handleCardSelect}
+                    className="w-48 h-72 sm:w-56 sm:h-80 rounded-2xl border-2 border-dashed border-cosmic-600 hover:border-stardust-500 glass-card hover:bg-cosmic-800/80 flex flex-col items-center justify-center text-cosmic-400 hover:text-stardust-300 transition-all gap-4 group"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Sparkles className="w-10 h-10 group-hover:animate-pulse" />
+                    <span className="text-sm font-semibold tracking-wide uppercase">อธิษฐานแล้วเปิดไพ่</span>
+                    <span className="text-xs text-cosmic-500 font-medium">ใบที่ {selectedCards.length + 1} / {currentType?.cards}</span>
+                  </motion.button>
+                )}
+              </div>
             </div>
 
             {/* แสดงความหมาย */}
@@ -170,16 +166,22 @@ export function SpecializedReading() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="mt-8 p-6 bg-white/5 rounded-lg"
+                className="mt-12 w-full pt-8 border-t border-cosmic-800"
               >
-                <h4 className="text-xl font-semibold mb-4">ความหมายของไพ่</h4>
-                <div className="space-y-4">
+                <h4 className="text-2xl font-display font-bold mb-6 text-white flex items-center gap-3">
+                  <Sparkles className="w-6 h-6 text-stardust-400" />
+                  ความหมายของไพ่
+                </h4>
+                <div className="space-y-6">
                   {selectedCards.map((card, index) => (
-                    <div key={index} className="p-4 bg-white/5 rounded-lg">
-                      <h5 className="font-medium mb-2">
-                        {card.name} {isReversed[index] ? '(กลับหัว)' : ''}
+                    <div key={index} className="p-6 glass-card rounded-2xl border border-cosmic-700/50 bg-cosmic-900/30">
+                      <h5 className="font-semibold mb-3 text-stardust-300 flex items-center gap-2 text-lg">
+                        <span className="w-6 h-6 rounded-full bg-cosmic-800 flex items-center justify-center text-xs text-stardust-400 border border-cosmic-600">
+                          {index + 1}
+                        </span>
+                        {card.name} {isReversed[index] ? <span className="text-red-400 text-sm font-normal">(กลับหัว)</span> : ''}
                       </h5>
-                      <p className="text-sm opacity-80">
+                      <p className="text-cosmic-200 leading-relaxed font-light pl-8">
                         {isReversed[index] 
                           ? card.meaning[selectedType as 'love' | 'career' | 'finance' | 'health'].reversed
                           : card.meaning[selectedType as 'love' | 'career' | 'finance' | 'health'].upright
@@ -188,17 +190,18 @@ export function SpecializedReading() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
-            )}
 
-            {currentType && selectedCards.length === currentType.cards && (
-              <motion.button
-                onClick={resetReading}
-                className="mt-6 px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
-                whileHover={{ scale: 1.05 }}
-              >
-                เริ่มทำนายใหม่
-              </motion.button>
+                <div className="mt-10 flex justify-center">
+                  <motion.button
+                    onClick={resetReading}
+                    className="px-8 py-3 bg-gradient-to-r from-cosmic-700 to-cosmic-900 border border-cosmic-600 hover:border-stardust-500 text-white rounded-full text-sm font-semibold transition-all hover:shadow-lg hover:shadow-stardust-500/20 uppercase tracking-wide"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    เริ่มทำนายใหม่
+                  </motion.button>
+                </div>
+              </motion.div>
             )}
           </motion.div>
         )}

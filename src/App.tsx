@@ -11,6 +11,7 @@ import ArticleDetailPage from './pages/ArticleDetailPage';
 import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
         <Footer />

@@ -6,6 +6,7 @@ import { TarotCard } from './TarotCard';
 import { saveReading } from '../utils/history';
 import { generateTarotReading } from '../utils/openrouter';
 import { v4 as uuidv4 } from 'uuid';
+import type { Card } from '../types/tarot';
 
 const POSITIONS = [
   { id: 0, name: 'สถานการณ์ปัจจุบัน', gridArea: '3/4/4/5', zIndex: 1 },
@@ -82,16 +83,16 @@ export function CelticCrossReading() {
   };
 
   return (
-    <div className="w-full bg-gradient-to-b from-purple-900 via-purple-800 to-indigo-900 p-8">
+    <div className="w-full">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
-          <h2 className="text-3xl font-bold text-white">การทำนายไพ่ทาโรต์แบบ Celtic Cross</h2>
-          <div className="flex gap-4">
+        <div className="flex justify-center sm:justify-end items-center mb-8 flex-wrap gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             {selectedCards.length === 10 ? (
               <motion.button
                 whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={startReading}
-                className="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors flex items-center"
+                className="px-6 py-3 bg-gradient-to-r from-cosmic-700 to-cosmic-900 border border-cosmic-600 hover:border-stardust-500 text-white rounded-full text-sm font-semibold transition-all hover:shadow-lg hover:shadow-stardust-500/20 uppercase tracking-wide flex items-center"
                 disabled={isReading}
               >
                 <Sparkles className="mr-2 h-4 w-4" />
@@ -100,17 +101,20 @@ export function CelticCrossReading() {
             ) : (
               <motion.button
                 whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleCardSelect}
-                className="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors flex items-center"
+                className="px-6 py-3 bg-gradient-to-r from-cosmic-700 to-cosmic-900 border border-cosmic-600 hover:border-stardust-500 text-white rounded-full text-sm font-semibold transition-all hover:shadow-lg hover:shadow-stardust-500/20 uppercase tracking-wide flex items-center"
                 disabled={selectedCards.length >= 10}
               >
-                เลือกไพ่ ({selectedCards.length}/10)
+                <Sparkles className="mr-2 h-4 w-4" />
+                เปิดไพ่ ({selectedCards.length}/10)
               </motion.button>
             )}
             <motion.button
               whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
               onClick={resetReading}
-              className="px-6 py-3 bg-purple-700/50 rounded-lg hover:bg-purple-600/50 transition-colors flex items-center"
+              className="px-6 py-3 glass-card hover:bg-cosmic-800/80 border border-cosmic-600 hover:border-red-400/50 text-white rounded-full text-sm font-semibold transition-all flex items-center tracking-wide uppercase"
               disabled={!isReading && selectedCards.length === 0}
             >
               <RotateCcw className="mr-2 h-4 w-4" />
@@ -119,7 +123,7 @@ export function CelticCrossReading() {
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 mb-8 overflow-auto">
+        <div className="glass-panel border border-cosmic-700/50 rounded-2xl p-4 sm:p-8 mb-8 overflow-auto relative min-h-[500px] flex items-center justify-center">
           {!isReading ? (
             <div className="flex flex-wrap justify-center gap-4 min-h-[300px]">
               {selectedCards.map((card, index) => (
@@ -133,11 +137,14 @@ export function CelticCrossReading() {
               ))}
               {selectedCards.length < 10 && (
                 <motion.div
-                  className="w-48 h-72 bg-purple-700/50 rounded-xl border-2 border-purple-400/50 flex items-center justify-center text-purple-200 cursor-pointer"
-                  whileHover={{ scale: 1.05 }}
+                  className="w-48 h-72 sm:w-56 sm:h-80 rounded-2xl border-2 border-dashed border-cosmic-600 hover:border-stardust-500 glass-card hover:bg-cosmic-800/80 flex flex-col items-center justify-center text-cosmic-400 hover:text-stardust-300 transition-all gap-4 group cursor-pointer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleCardSelect}
                 >
-                  คลิกเพื่อเลือกไพ่
+                  <Sparkles className="w-10 h-10 group-hover:animate-pulse" />
+                  <span className="text-sm font-semibold tracking-wide uppercase">อธิษฐานแล้วเปิดไพ่</span>
+                  <span className="text-xs text-cosmic-500 font-medium">ใบที่ {selectedCards.length + 1} / 10</span>
                 </motion.div>
               )}
             </div>
@@ -166,7 +173,7 @@ export function CelticCrossReading() {
                         isRevealed={true}
                       />
                     </div>
-                    <div className="absolute -bottom-5 text-xs text-purple-200 text-center w-full">
+                    <div className="absolute -bottom-5 text-xs text-cosmic-300 text-center w-full font-medium tracking-wide drop-shadow-sm">
                       {position.name}
                     </div>
                   </div>
@@ -180,30 +187,41 @@ export function CelticCrossReading() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-6"
+            className="mt-12 w-full pt-8 border-t border-cosmic-800"
           >
-            <h3 className="text-xl font-bold text-white mb-3">คำทำนายจากไพ่</h3>
+            <h3 className="text-2xl font-display font-bold text-white mb-6 flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-stardust-400" /> คำทำนายจากไพ่
+            </h3>
 
             {isLoadingAI ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="animate-spin h-8 w-8 text-purple-400 mr-3" />
-                <span className="text-purple-200">กำลังทำนาย...</span>
+              <div className="flex flex-col items-center justify-center py-12 gap-4">
+                <div className="flex gap-2">
+                  <div className="w-2.5 h-2.5 bg-stardust-400 rounded-full animate-bounce shadow-[0_0_10px_rgba(234,179,8,0.6)]" />
+                  <div className="w-2.5 h-2.5 bg-stardust-400 rounded-full animate-bounce [animation-delay:0.2s] shadow-[0_0_10px_rgba(234,179,8,0.6)]" />
+                  <div className="w-2.5 h-2.5 bg-stardust-400 rounded-full animate-bounce [animation-delay:0.4s] shadow-[0_0_10px_rgba(234,179,8,0.6)]" />
+                </div>
+                <span className="text-sm font-medium tracking-wide animate-pulse text-cosmic-300">กำลังสแกนดวงดาวและทำนาย...</span>
               </div>
             ) : aiReading ? (
-              <div className="bg-purple-800/30 rounded-lg p-4">
-                <p className="text-purple-100 whitespace-pre-wrap leading-relaxed">
+              <div className="glass-card bg-cosmic-900/30 border border-cosmic-700/50 rounded-2xl p-6 sm:p-10 shadow-xl">
+                <p className="text-cosmic-200 whitespace-pre-wrap leading-relaxed text-lg font-light">
                   {aiReading}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {selectedCards.map((card, index) => (
-                  <div key={index} className="p-3 bg-purple-800/50 rounded-lg">
-                    <h4 className="font-bold text-base text-purple-200">
-                      {POSITIONS[index].name} - {card.name}
-                      {isReversed[index] ? ' (กลับหัว)' : ''}
+                  <div key={index} className="p-5 glass-card rounded-2xl border border-cosmic-700/50 bg-cosmic-900/30">
+                    <h4 className="font-semibold mb-3 text-stardust-300 flex items-center gap-2 text-sm sm:text-base">
+                      <span className="w-6 h-6 rounded-full bg-cosmic-800 flex items-center justify-center text-xs text-stardust-400 border border-cosmic-600 shrink-0">
+                        {index + 1}
+                      </span>
+                      <span className="line-clamp-1">{POSITIONS[index].name}</span>
+                      <span className="text-cosmic-300 mx-1">-</span> 
+                      <span className="line-clamp-1 truncate">{card.name}</span>
+                      {isReversed[index] ? <span className="text-red-400 font-normal shrink-0">(กลับหัว)</span> : ''}
                     </h4>
-                    <p className="mt-1 text-sm text-purple-300">
+                    <p className="text-cosmic-200 leading-relaxed font-light text-sm pl-8">
                       {isReversed[index] ? card.meaning.reversed : card.meaning.upright}
                     </p>
                   </div>

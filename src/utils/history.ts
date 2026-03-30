@@ -7,8 +7,11 @@ interface ReadingHistory {
     cards?: {
       name: string;
       isReversed: boolean;
+      position?: string;
     }[];
     sign?: string;
+    specializedType?: string;
+    [key: string]: any;
   };
 }
 
