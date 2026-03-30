@@ -1,10 +1,12 @@
-import { 
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   User,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
@@ -44,11 +46,41 @@ export const authService = {
 
   async login(email: string, password: string) {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    
+
     // Update last login
     await updateDoc(doc(db, 'users', userCredential.user.uid), {
       lastLoginAt: serverTimestamp(),
     });
+
+    return userCredential.user;
+  },
+
+  async loginWithGoogle(): Promise<User> {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    console.log('Google sign-in successful:', userCredential.user.uid);
+
+    // Check if user profile exists, if not create one
+    const existingProfile = await getDoc(doc(db, 'users', userCredential.user.uid));
+    if (!existingProfile.exists()) {
+      const userProfile: UserProfile = {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email || '',
+        displayName: userCredential.user.displayName || undefined,
+        isPremium: false,
+        credits: 0,
+        freeReadingsCount: 0,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+      await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
+      console.log('New Google user profile created');
+    } else {
+      // Update last login
+      await updateDoc(doc(db, 'users', userCredential.user.uid), {
+        lastLoginAt: serverTimestamp(),
+      });
+    }
 
     return userCredential.user;
   },
