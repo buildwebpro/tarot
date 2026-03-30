@@ -93,11 +93,6 @@ export function getCardImageCode(cardName: string): string {
   if (parts.length === 2) {
     const [number, suit] = parts;
     const suitCode = suitMap[suit];
-    
-    // เพิ่ม logging เพื่อตรวจสอบ
-    console.log('Card parts:', { number, suit });
-    console.log('Suit code:', suitCode);
-    console.log('Number code:', numberMap[number]);
 
     if (!suitCode) {
       console.warn(`ไม่พบรหัสสำหรับชุดไพ่: ${suit}`);
@@ -111,7 +106,6 @@ export function getCardImageCode(cardName: string): string {
     }
 
     const imageCode = `${suitCode}${numberCode}`;
-    console.log('Final image code:', imageCode);
     return imageCode;
   }
 

@@ -16,7 +16,6 @@ export const authService = {
   async register(email: string, password: string, displayName?: string) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('Auth user created:', userCredential.user.uid);
 
       if (displayName) {
         await updateProfile(userCredential.user, { displayName });
@@ -35,7 +34,6 @@ export const authService = {
       };
 
       await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
-      console.log('Firestore document created for:', userCredential.user.uid);
 
       return userCredential.user;
     } catch (error: any) {
@@ -58,11 +56,9 @@ export const authService = {
   async loginWithGoogle(): Promise<User> {
     const provider = new GoogleAuthProvider();
     const userCredential = await signInWithPopup(auth, provider);
-    console.log('Google sign-in successful:', userCredential.user.uid);
 
     // Check if user profile exists, if not create one
     const existingProfile = await getDoc(doc(db, 'users', userCredential.user.uid));
-    console.log('Existing profile check:', existingProfile.exists());
 
     if (!existingProfile.exists()) {
       const userProfile: UserProfile = {
@@ -76,11 +72,8 @@ export const authService = {
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
       };
-      console.log('Creating profile with data:', JSON.stringify(userProfile));
       await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
-      console.log('New Google user profile created successfully');
     } else {
-      console.log('Existing profile data:', JSON.stringify(existingProfile.data()));
       // Update last login
       await updateDoc(doc(db, 'users', userCredential.user.uid), {
         lastLoginAt: serverTimestamp(),
