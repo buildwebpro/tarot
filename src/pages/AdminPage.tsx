@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Star, CreditCard, History, Shield, Search, ChevronLeft, ChevronRight, Crown, Trash2, Edit2, FileText, Plus, Eye, Globe } from 'lucide-react';

@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { UranianForm } from '../components/UranianForm';
 import { Sparkles } from 'lucide-react';
 

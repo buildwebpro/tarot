@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { ArticleList } from '../components/ArticleList';
 import { BookOpen, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
