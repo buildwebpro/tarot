@@ -123,11 +123,11 @@ export function CelticCrossReading() {
           </div>
         </div>
 
-        <div className="glass-panel border border-cosmic-700/50 rounded-2xl p-4 sm:p-8 mb-8 overflow-auto relative min-h-[500px] flex items-center justify-center">
+        <div className="glass-panel border border-cosmic-700/50 rounded-2xl p-4 sm:p-8 mb-8 overflow-x-auto relative min-h-[500px] flex items-center justify-center">
           {!isReading ? (
             <div className="flex flex-wrap justify-center gap-4 min-h-[300px]">
               {selectedCards.map((card, index) => (
-                <div key={index} className="transform scale-[0.52]">
+                <div key={index} className="transform scale-[0.45] sm:scale-[0.52]">
                   <TarotCard
                     card={card}
                     isReversed={isReversed[index]}
@@ -137,20 +137,20 @@ export function CelticCrossReading() {
               ))}
               {selectedCards.length < 10 && (
                 <motion.div
-                  className="w-48 h-72 sm:w-56 sm:h-80 rounded-2xl border-2 border-dashed border-cosmic-600 hover:border-stardust-500 glass-card hover:bg-cosmic-800/80 flex flex-col items-center justify-center text-cosmic-400 hover:text-stardust-300 transition-all gap-4 group cursor-pointer"
+                  className="w-40 h-64 sm:w-56 sm:h-80 rounded-2xl border-2 border-dashed border-cosmic-600 hover:border-stardust-500 glass-card hover:bg-cosmic-800/80 flex flex-col items-center justify-center text-cosmic-400 hover:text-stardust-300 transition-all gap-4 group cursor-pointer"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleCardSelect}
                 >
-                  <Sparkles className="w-10 h-10 group-hover:animate-pulse" />
-                  <span className="text-sm font-semibold tracking-wide uppercase">อธิษฐานแล้วเปิดไพ่</span>
+                  <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 group-hover:animate-pulse" />
+                  <span className="text-xs sm:text-sm font-semibold tracking-wide uppercase">อธิษฐานแล้วเปิดไพ่</span>
                   <span className="text-xs text-cosmic-500 font-medium">ใบที่ {selectedCards.length + 1} / 10</span>
                 </motion.div>
               )}
             </div>
           ) : (
-            <div className="flex justify-center">
-              <div className="relative grid grid-cols-7 grid-rows-6 gap-2 w-[1000px] h-[750px]">
+            <div className="flex justify-center min-w-full">
+              <div className="relative grid grid-cols-7 grid-rows-6 gap-2 w-[900px] h-[680px] max-w-full">
                 {POSITIONS.map((position, index) => (
                   <div
                     key={index}
