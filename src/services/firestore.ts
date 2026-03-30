@@ -141,8 +141,15 @@ export const articleService = {
   },
 
   async updateArticle(articleId: string, updates: Partial<Article>) {
+    // Filter out undefined values to prevent Firestore errors
+    const cleanUpdates: Record<string, any> = {};
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value !== undefined) {
+        cleanUpdates[key] = value;
+      }
+    });
     await updateDoc(doc(db, 'articles', articleId), {
-      ...updates,
+      ...cleanUpdates,
       updatedAt: new Date().toISOString(),
     });
   },
