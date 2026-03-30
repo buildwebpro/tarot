@@ -9,17 +9,17 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.token.admin == true;
     }
 
-    // โปรไฟล์ผู้ใช้ - อ่านได้เฉพาะเจ้าของ
+    // โปรไฟล์ผู้ใช้ - อ่านได้เฉพาะเจ้าของ, admin อ่านได้ทั้งหมด
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId || request.auth.token.admin == true);
+      allow write: if request.auth != null && (request.auth.uid == userId || request.auth.token.admin == true);
     }
 
-    // ประวัติการทำนาย - อ่าน/เขียนได้เฉพาะเจ้าของ
-    match /users/{userId}/readings/{readingId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update, delete: if request.auth != null && request.auth.uid == userId;
+    // ประวัติการทำนาย - อ่าน/เขียนได้เฉพาะเจ้าของ, admin อ่านได้ทั้งหมด
+    match /history/{readingId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
     }
 
     // อนุญาตให้อ่านได้ทั้งหมด
