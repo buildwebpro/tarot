@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Star, CreditCard, History, Shield, Search, ChevronLeft, ChevronRight, Crown, Trash2, Edit2 } from 'lucide-react';
+import { Users, Star, CreditCard, History, Shield, Search, ChevronLeft, ChevronRight, Crown, Trash2, Edit2, FileText, Plus, Eye, Globe } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usersService } from '../services/users';
-import { historyService } from '../services/firestore';
+import { historyService, articleService } from '../services/firestore';
 import type { UserProfile } from '../types/firebase';
-import type { ReadingHistory } from '../types/firebase';
+import type { ReadingHistory, Article } from '../types/firebase';
+import { ArticleForm } from '../components/ArticleForm';
 
 export default function AdminPage() {
   const { user, userProfile, isLoading: authLoading } = useAuth();
@@ -16,10 +17,17 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [userReadings, setUserReadings] = useState<ReadingHistory[]>([]);
-  const [activeTab, setActiveTab] = useState<'users' | 'readings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'readings' | 'articles'>('users');
   const [allReadings, setAllReadings] = useState<ReadingHistory[]>([]);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [topUpLoading, setTopUpLoading] = useState(false);
+
+  // Articles state
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [articlesLoading, setArticlesLoading] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [showArticleForm, setShowArticleForm] = useState(false);
+  const [articleSearchQuery, setArticleSearchQuery] = useState('');
 
   useEffect(() => {
     if (userProfile?.isAdmin) {
@@ -35,6 +43,12 @@ export default function AdminPage() {
 
       const readings = await historyService.getAllReadings();
       setAllReadings(readings);
+
+      // Load articles
+      setArticlesLoading(true);
+      const allArticles = await articleService.getArticles();
+      setArticles(allArticles);
+      setArticlesLoading(false);
     } catch (error) {
       console.error('Error loading admin data:', error);
     } finally {
@@ -84,10 +98,50 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteArticle = async (articleId: string) => {
+    if (!confirm('ต้องการลบบทความนี้?')) return;
+    try {
+      await articleService.deleteArticle(articleId);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting article:', error);
+    }
+  };
+
+  const handleSaveArticle = () => {
+    setShowArticleForm(false);
+    setSelectedArticle(null);
+    loadData();
+  };
+
+  const handleEditArticle = (article: Article) => {
+    setSelectedArticle(article);
+    setShowArticleForm(true);
+  };
+
+  const handleCreateArticle = () => {
+    setSelectedArticle(null);
+    setShowArticleForm(true);
+  };
+
   const filteredUsers = users.filter(u =>
     u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     u.displayName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const filteredArticles = articles.filter(a =>
+    a.title.toLowerCase().includes(articleSearchQuery.toLowerCase()) ||
+    a.category.toLowerCase().includes(articleSearchQuery.toLowerCase()) ||
+    a.tags.some(tag => tag.toLowerCase().includes(articleSearchQuery.toLowerCase()))
+  );
+
+  const categoryLabels: Record<string, string> = {
+    general: 'ทั่วไป',
+    uranian: 'ยูเรเนียน',
+    tarot: 'ทาโรต์',
+    zodiac: 'ดูดวงรายวัน',
+    premium: 'Premium',
+  };
 
   if (authLoading) {
     return (
@@ -192,6 +246,17 @@ export default function AdminPage() {
               <History className="w-4 h-4 inline-block mr-2" />
               ประวัติการทำนาย
             </button>
+            <button
+              onClick={() => setActiveTab('articles')}
+              className={`pb-4 px-4 font-medium transition-colors ${
+                activeTab === 'articles'
+                  ? 'text-amber-400 border-b-2 border-amber-400'
+                  : 'text-purple-300 hover:text-white'
+              }`}
+            >
+              <FileText className="w-4 h-4 inline-block mr-2" />
+              บทความ
+            </button>
           </div>
         </div>
 
@@ -276,6 +341,143 @@ export default function AdminPage() {
                 </table>
               </div>
             </div>
+          </div>
+        ) : activeTab === 'articles' ? (
+          <div className="max-w-6xl mx-auto px-4">
+            {/* Articles Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+                <input
+                  type="text"
+                  placeholder="ค้นหาบทความ..."
+                  value={articleSearchQuery}
+                  onChange={(e) => setArticleSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-white/10 border border-purple-700/50 rounded-xl text-white placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+              </div>
+              <button
+                onClick={handleCreateArticle}
+                className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-stardust-500 to-stardust-600 hover:from-stardust-400 hover:to-stardust-500 text-deep-950 font-semibold rounded-xl transition-all ml-4"
+              >
+                <Plus className="w-4 h-4" />
+                สร้างบทความ
+              </button>
+            </div>
+
+            {/* Articles Table */}
+            {articlesLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce" />
+                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-purple-900/50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">บทความ</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">หมวดหมู่</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">Tags</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">SEO</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">วันที่เผยแพร่</th>
+                        <th className="px-6 py-4 text-right text-sm font-semibold text-purple-200">จัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-purple-800/50">
+                      {filteredArticles.map((article) => (
+                        <tr key={article.id} className="hover:bg-purple-800/30 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              {article.imageUrl ? (
+                                <img src={article.imageUrl} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                              ) : (
+                                <div className="w-12 h-12 rounded-lg bg-cosmic-800 flex items-center justify-center">
+                                  <FileText className="w-5 h-5 text-cosmic-500" />
+                                </div>
+                              )}
+                              <div>
+                                <p className="font-medium text-white line-clamp-1">{article.title}</p>
+                                <p className="text-sm text-purple-300 line-clamp-1">/{article.slug}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              article.category === 'premium' ? 'bg-amber-500/20 text-amber-300' :
+                              article.category === 'uranian' ? 'bg-blue-500/20 text-blue-300' :
+                              article.category === 'tarot' ? 'bg-purple-500/20 text-purple-300' :
+                              article.category === 'zodiac' ? 'bg-green-500/20 text-green-300' :
+                              'bg-gray-500/20 text-gray-300'
+                            }`}>
+                              {categoryLabels[article.category] || article.category}
+                            </span>
+                            {article.isPremium && (
+                              <Crown className="w-3 h-3 text-amber-400 ml-1 inline" />
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {article.tags.slice(0, 2).map((tag, i) => (
+                                <span key={i} className="text-xs bg-cosmic-800 text-cosmic-300 px-2 py-0.5 rounded">
+                                  #{tag}
+                                </span>
+                              ))}
+                              {article.tags.length > 2 && (
+                                <span className="text-xs text-cosmic-400">+{article.tags.length - 2}</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              {article.seoTitle && <Globe className="w-4 h-4 text-green-400" title="มี SEO" />}
+                              <span className="text-xs text-cosmic-400">
+                                {article.seoTitle?.length || 0}/60
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-purple-300 text-sm">
+                              {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('th-TH') : '-'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleEditArticle(article)}
+                                className="p-2 text-purple-300 hover:text-white hover:bg-purple-700/50 rounded-lg transition-colors"
+                                title="แก้ไข"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteArticle(article.id)}
+                                className="p-2 text-purple-300 hover:text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
+                                title="ลบ"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredArticles.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-12 text-center text-cosmic-400">
+                            <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                            <p>ยังไม่มีบทความ</p>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="max-w-6xl mx-auto px-4">
@@ -398,6 +600,18 @@ export default function AdminPage() {
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* Article Form Modal */}
+      {showArticleForm && (
+        <ArticleForm
+          article={selectedArticle}
+          onSave={handleSaveArticle}
+          onCancel={() => {
+            setShowArticleForm(false);
+            setSelectedArticle(null);
+          }}
+        />
       )}
     </>
   );

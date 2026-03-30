@@ -132,6 +132,10 @@ export const articleService = {
       ...article,
       publishedAt: now,
       updatedAt: now,
+      // Default SEO values if not provided
+      seoTitle: article.seoTitle || article.title,
+      seoDescription: article.seoDescription || article.excerpt,
+      seoKeywords: article.seoKeywords || article.tags.join(', '),
     });
     return docRef.id;
   },

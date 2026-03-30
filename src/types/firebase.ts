@@ -44,4 +44,9 @@ export interface Article {
   isPremium: boolean;
   imageUrl?: string;
   tags: string[];
+  // SEO Fields
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  canonicalUrl?: string;
 }
