@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { User } from 'firebase/auth';
 import { authService } from '../services/firebase';
 import type { UserProfile } from '../types/firebase';
@@ -12,6 +12,7 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (email: string, password: string, displayName?: string) => Promise<User>;
+  loginWithGoogle: () => Promise<User>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -22,10 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const profileFetchedRef = useRef(false);
 
   const fetchProfile = useCallback(async (uid: string) => {
     try {
       const profile = await authService.getUserProfile(uid);
+      console.log('Fetched profile:', profile);
       setUserProfile(profile);
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -41,8 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = authService.onAuthChange(async (firebaseUser) => {
+      console.log('Auth state changed, user:', firebaseUser?.uid);
       setUser(firebaseUser);
       if (firebaseUser) {
+        // Small delay to ensure profile is created first
+        await new Promise(resolve => setTimeout(resolve, 500));
         await fetchProfile(firebaseUser.uid);
       } else {
         setUserProfile(null);
@@ -63,6 +69,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return newUser;
   }, []);
 
+  const loginWithGoogle = useCallback(async () => {
+    const loggedInUser = await authService.loginWithGoogle();
+    // Wait for profile to be created then fetch
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await fetchProfile(loggedInUser.uid);
+    return loggedInUser;
+  }, [fetchProfile]);
+
   const logout = useCallback(async () => {
     await authService.logout();
     setUserProfile(null);
@@ -77,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin: userProfile?.isAdmin ?? false,
     login,
     register,
+    loginWithGoogle,
     logout,
     refreshProfile,
   };

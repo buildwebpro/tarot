@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { X, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { authService } from '../services/firebase';
+import { useAuth } from '../contexts/AuthContext';
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -15,6 +15,7 @@ const GoogleIcon = () => (
 );
 
 export default function LoginPage() {
+  const { loginWithGoogle } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,7 +48,7 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
     try {
-      await authService.loginWithGoogle();
+      await loginWithGoogle();
       navigate('/');
     } catch (err: any) {
       setError(err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');

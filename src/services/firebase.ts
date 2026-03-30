@@ -62,20 +62,25 @@ export const authService = {
 
     // Check if user profile exists, if not create one
     const existingProfile = await getDoc(doc(db, 'users', userCredential.user.uid));
+    console.log('Existing profile check:', existingProfile.exists());
+
     if (!existingProfile.exists()) {
       const userProfile: UserProfile = {
         uid: userCredential.user.uid,
         email: userCredential.user.email || '',
         displayName: userCredential.user.displayName || undefined,
         isPremium: false,
+        isAdmin: false,
         credits: 0,
         freeReadingsCount: 0,
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
       };
+      console.log('Creating profile with data:', JSON.stringify(userProfile));
       await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
-      console.log('New Google user profile created');
+      console.log('New Google user profile created successfully');
     } else {
+      console.log('Existing profile data:', JSON.stringify(existingProfile.data()));
       // Update last login
       await updateDoc(doc(db, 'users', userCredential.user.uid), {
         lastLoginAt: serverTimestamp(),
