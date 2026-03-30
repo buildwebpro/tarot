@@ -15,7 +15,9 @@
       "WebFetch(domain:www.astrology.com)",
       "WebFetch(domain:en.wikipedia.org)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:www.npmjs.com)"
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(firebase deploy:*)",
+      "Bash(firebase firestore:rules:get:*)"
     ]
   }
 }

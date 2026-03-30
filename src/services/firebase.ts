@@ -12,27 +12,34 @@ import type { UserProfile } from '../types/firebase';
 
 export const authService = {
   async register(email: string, password: string, displayName?: string) {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    
-    if (displayName) {
-      await updateProfile(userCredential.user, { displayName });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('Auth user created:', userCredential.user.uid);
+
+      if (displayName) {
+        await updateProfile(userCredential.user, { displayName });
+      }
+
+      // Create user profile in Firestore
+      const userProfile: UserProfile = {
+        uid: userCredential.user.uid,
+        email,
+        displayName: displayName || undefined,
+        isPremium: false,
+        credits: 0,
+        freeReadingsCount: 0,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+
+      await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
+      console.log('Firestore document created for:', userCredential.user.uid);
+
+      return userCredential.user;
+    } catch (error: any) {
+      console.error('Registration error:', error.code, error.message);
+      throw error;
     }
-
-    // Create user profile in Firestore
-    const userProfile: UserProfile = {
-      uid: userCredential.user.uid,
-      email,
-      displayName: displayName || undefined,
-      isPremium: false,
-      credits: 0,
-      freeReadingsCount: 0,
-      createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-    };
-
-    await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
-    
-    return userCredential.user;
   },
 
   async login(email: string, password: string) {
