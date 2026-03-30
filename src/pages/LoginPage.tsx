@@ -15,7 +15,7 @@ const GoogleIcon = () => (
 );
 
 export default function LoginPage() {
-  const { loginWithGoogle } = useAuth();
+  const { login, register, loginWithGoogle } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,10 +31,10 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        await authService.login(email, password);
+        await login(email, password);
         navigate('/');
       } else {
-        await authService.register(email, password, displayName || undefined);
+        await register(email, password, displayName || undefined);
         navigate('/');
       }
     } catch (err: any) {
