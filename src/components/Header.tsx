@@ -139,6 +139,7 @@ export function Header() {
             </div>
 
             <Link to="/articles" className={navLinkClass('/articles')}>บทความ</Link>
+            <Link to="/pricing" className={navLinkClass('/pricing')}>ค่าบริการ</Link>
             <Link to="/history" className={navLinkClass('/history')}>ประวัติ</Link>
             {isAdmin && (
               <Link to="/admin" className={navLinkClass('/admin')}>
@@ -230,6 +231,9 @@ export function Header() {
               <div className="border-t border-cosmic-800/50 mt-3 pt-3">
                 <Link to="/articles" className="block px-3 py-2.5 rounded-lg text-cosmic-100 hover:bg-cosmic-800/50 hover:text-stardust-300 font-medium text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
                   📚 บทความ
+                </Link>
+                <Link to="/pricing" className="block px-3 py-2.5 rounded-lg text-cosmic-100 hover:bg-cosmic-800/50 hover:text-stardust-300 font-medium text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
+                  💰 ค่าบริการ
                 </Link>
                 <Link to="/history" className="block px-3 py-2.5 rounded-lg text-cosmic-100 hover:bg-cosmic-800/50 hover:text-stardust-300 font-medium text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
                   📋 ประวัติ

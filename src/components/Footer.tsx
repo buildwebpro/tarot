@@ -41,6 +41,7 @@ export function Footer() {
               <li><Link to="/horoscope" className="hover:text-stardust-300 transition-colors">ดูดวงรายวัน</Link></li>
               <li><Link to="/uranian" className="hover:text-stardust-300 transition-colors">โหราศาสตร์ยูเรเนียน</Link></li>
               <li><Link to="/articles" className="hover:text-stardust-300 transition-colors">บทความ</Link></li>
+              <li><Link to="/pricing" className="hover:text-stardust-300 transition-colors">ค่าบริการ</Link></li>
             </ul>
           </div>
 
@@ -61,6 +62,7 @@ export function Footer() {
           </p>
           <div className="flex gap-6 text-xs">
             <Link to="/articles" className="hover:text-stardust-300 transition-colors">บทความ</Link>
+            <Link to="/pricing" className="hover:text-stardust-300 transition-colors">ค่าบริการ</Link>
             <Link to="/history" className="hover:text-stardust-300 transition-colors">ประวัติ</Link>
           </div>
         </div>
