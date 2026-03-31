@@ -72,10 +72,10 @@ export const zodiacSigns: ZodiacSign[] = [
   },
   {
     name: 'Capricorn',
-    thaiName: 'ราศีมังกร',
+    thaiName: 'ราศีมกร',
     period: '22 ธันวาคม - 19 มกราคม',
     element: 'ธาตุดิน',
-    image: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Goat.png'
+    image: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/2/svg/2651.svg'
   },
   {
     name: 'Aquarius',
