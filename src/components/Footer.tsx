@@ -40,8 +40,16 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li><Link to="/horoscope" className="hover:text-stardust-300 transition-colors">ดูดวงรายวัน</Link></li>
               <li><Link to="/uranian" className="hover:text-stardust-300 transition-colors">โหราศาสตร์ยูเรเนียน</Link></li>
+            </ul>
+          </div>
+
+          {/* บริการ */}
+          <div>
+            <h3 className="text-xs font-semibold text-stardust-400 uppercase tracking-wider mb-4">บริการ</h3>
+            <ul className="space-y-2.5 text-sm">
               <li><Link to="/articles" className="hover:text-stardust-300 transition-colors">บทความ</Link></li>
               <li><Link to="/pricing" className="hover:text-stardust-300 transition-colors">ค่าบริการ</Link></li>
+              <li><Link to="/history" className="hover:text-stardust-300 transition-colors">ประวัติ</Link></li>
             </ul>
           </div>
 

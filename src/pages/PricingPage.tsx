@@ -186,8 +186,11 @@ export default function PricingPage() {
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
             พร้อมเปิดรับคำทำนายแล้วหรือยัง?
           </h2>
-          <p className="text-cosmic-300 text-lg mb-8">
+          <p className="text-cosmic-300 text-lg mb-4">
             เริ่มต้นเส้นทางของคุณกับหน้าไพ่ทาโรต์วันนี้
+          </p>
+          <p className="text-stardust-400 font-medium mb-8">
+            👤 ติดต่อทาง Inbox ได้เลยครับ!
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
