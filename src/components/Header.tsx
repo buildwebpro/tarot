@@ -140,7 +140,7 @@ export function Header() {
 
             <Link to="/articles" className={navLinkClass('/articles')}>บทความ</Link>
             <Link to="/pricing" className={navLinkClass('/pricing')}>ค่าบริการ</Link>
-            <Link to="/history" className={navLinkClass('/history')}>ประวัติ</Link>
+            {/* ซ่อนชั่วคราว: <Link to="/history" className={navLinkClass('/history')}>ประวัติ</Link> */}
             {isAdmin && (
               <Link to="/admin" className={navLinkClass('/admin')}>
                 <span className="flex items-center gap-1">
@@ -235,9 +235,10 @@ export function Header() {
                 <Link to="/pricing" className="block px-3 py-2.5 rounded-lg text-cosmic-100 hover:bg-cosmic-800/50 hover:text-stardust-300 font-medium text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
                   💰 ค่าบริการ
                 </Link>
+                {/* ซ่อนชั่วคราว:
                 <Link to="/history" className="block px-3 py-2.5 rounded-lg text-cosmic-100 hover:bg-cosmic-800/50 hover:text-stardust-300 font-medium text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
                   📋 ประวัติ
-                </Link>
+                </Link> */}
                 {isAdmin && (
                   <Link to="/admin" className="block px-3 py-2.5 rounded-lg text-amber-400 hover:bg-cosmic-800/50 hover:text-amber-300 font-medium text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
                     🛡️ จัดการระบบ

@@ -1,18 +1,32 @@
 import { Routes, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { Suspense, lazy } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-import HomePage from './pages/HomePage';
-import TarotPage from './pages/TarotPage';
-import HoroscopePage from './pages/HoroscopePage';
-import UranianPage from './pages/UranianPage';
-import ArticlesPage from './pages/ArticlesPage';
-import ArticleDetailPage from './pages/ArticleDetailPage';
-import HistoryPage from './pages/HistoryPage';
-import ProfilePage from './pages/ProfilePage';
-import LoginPage from './pages/LoginPage';
-import AdminPage from './pages/AdminPage';
-import PricingPage from './pages/PricingPage';
+
+// Lazy load pages — each page loads only when visited
+const HomePage         = lazy(() => import('./pages/HomePage'));
+const TarotPage        = lazy(() => import('./pages/TarotPage'));
+const HoroscopePage    = lazy(() => import('./pages/HoroscopePage'));
+const UranianPage      = lazy(() => import('./pages/UranianPage'));
+const ArticlesPage     = lazy(() => import('./pages/ArticlesPage'));
+const ArticleDetailPage= lazy(() => import('./pages/ArticleDetailPage'));
+// ซ่อนชั่วคราว: const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const ProfilePage      = lazy(() => import('./pages/ProfilePage'));
+const LoginPage        = lazy(() => import('./pages/LoginPage'));
+const AdminPage        = lazy(() => import('./pages/AdminPage'));
+const PricingPage      = lazy(() => import('./pages/PricingPage'));
+
+function PageLoader() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-stardust-500/30 border-t-stardust-400 animate-spin" />
+        <p className="text-cosmic-300 text-sm animate-pulse">กำลังโหลด...</p>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -51,19 +65,21 @@ function App() {
       <div className="min-h-screen flex flex-col bg-transparent text-cosmic-100">
         <Header />
         <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/tarot" element={<TarotPage />} />
-            <Route path="/horoscope" element={<HoroscopePage />} />
-            <Route path="/uranian" element={<UranianPage />} />
-            <Route path="/articles" element={<ArticlesPage />} />
-            <Route path="/articles/:slug" element={<ArticleDetailPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/tarot" element={<TarotPage />} />
+              <Route path="/horoscope" element={<HoroscopePage />} />
+              <Route path="/uranian" element={<UranianPage />} />
+              <Route path="/articles" element={<ArticlesPage />} />
+              <Route path="/articles/:slug" element={<ArticleDetailPage />} />
+              {/* ซ่อนชั่วคราว: <Route path="/history" element={<HistoryPage />} /> */}
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>
