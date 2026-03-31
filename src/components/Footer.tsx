@@ -49,9 +49,7 @@ export function Footer() {
           <div>
             <h3 className="text-xs font-semibold text-stardust-400 uppercase tracking-wider mb-4">ติดต่อ</h3>
             <ul className="space-y-2.5 text-sm">
-              <li>📧 rujskiddao@gmail.com</li>
-              <li>📱 Line: 0942511969</li>
-              <li>👤 Facebook: รุท สะกิดดาว</li>
+              <li>👤 ติดต่อทาง Inbox ได้เลยครับ!</li>
             </ul>
           </div>
         </div>
