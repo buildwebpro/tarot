@@ -17,6 +17,7 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
   const [birthPlace, setBirthPlace] = useState('');
   const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [reading, setReading] = useState('');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -42,6 +43,7 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
     if (!canProceed) return;
 
     setIsLoading(true);
+    setStatus('กำลังเตรียมข้อมูล...');
 
     try {
       const reading = await getUranianReading({
@@ -49,6 +51,7 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
         birthTime,
         birthPlace,
         question: question || undefined,
+        onProgress: (msg) => setStatus(msg),
       });
 
       setReading(reading);
@@ -201,7 +204,7 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
                   <div className="w-2 h-2 bg-white rounded-full animate-bounce" />
                   <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.2s]" />
                   <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.4s]" />
-                  กำลังคำนวณดวงชะตา...
+                  {status || 'กำลังคำนวณ...'}
                 </span>
               ) : (
                 'เปิดคำทำนาย'
