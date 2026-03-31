@@ -45,7 +45,7 @@ export default function PricingPage() {
       description: "ศาสตร์แห่งการถาม-ตอบ ตามเวลาที่เกิดเหตุการณ์จริง",
       icon: <HelpCircle className="w-5 h-5" />,
       featured: false,
-      price: "300",
+      price: "500",
       unit: "ต่อ 1 คำถาม",
       features: [
         "ตามหาของหาย: วิเคราะห์ทิศทางและลักษณะสถานที่ที่ของตกหล่น",
