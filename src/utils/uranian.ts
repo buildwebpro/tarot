@@ -43,7 +43,8 @@ export async function getUranianReading(data: UranianData): Promise<string> {
   data.onProgress?.('กำลังคำนวณผังดวงชะตาด้วยดาราศาสตร์ (Swiss Ephemeris)...');
   let chartDataStr = "";
   try {
-    const chartRes = await fetch(`https://astrology.buildweb.pro/chart?date=${data.birthDate}&time=${data.birthTime}&lat=${lat}&lon=${lon}`);
+    const apiUrl = import.meta.env.VITE_ASTROLOGY_API_URL || 'https://astrology.buildweb.pro';
+    const chartRes = await fetch(`${apiUrl}/chart?date=${data.birthDate}&time=${data.birthTime}&lat=${lat}&lon=${lon}`);
     if (chartRes.ok) {
       const chartJson = await chartRes.json();
       

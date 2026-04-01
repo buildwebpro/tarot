@@ -2,7 +2,9 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Star, Grid3X3, Layers, Globe } from 'lucide-react';
-import { ArticleList } from '../components/ArticleList';
+import { lazy, Suspense } from 'react';
+
+const ArticleList = lazy(() => import('../components/ArticleList'));
 
 export default function HomePage() {
   const services = [
@@ -55,31 +57,8 @@ export default function HomePage() {
         {/* Background cosmic elements */}
         <div className="absolute inset-0 bg-gradient-to-b from-cosmic-950/40 via-transparent to-cosmic-980/90 pointer-events-none" />
 
-        {/* Starfield background */}
-        <div className="absolute inset-0 pointer-events-none opacity-40"
-          style={{
-            backgroundImage: `
-              radial-gradient(1px 1px at 10% 20%, rgba(253,224,71,0.8) 0%, transparent 100%),
-              radial-gradient(1.5px 1.5px at 30% 10%, rgba(253,224,71,0.6) 0%, transparent 100%),
-              radial-gradient(1px 1px at 50% 30%, rgba(255,255,255,0.7) 0%, transparent 100%),
-              radial-gradient(1px 1px at 70% 15%, rgba(253,224,71,0.5) 0%, transparent 100%),
-              radial-gradient(1.5px 1.5px at 90% 25%, rgba(255,255,255,0.6) 0%, transparent 100%),
-              radial-gradient(1px 1px at 15% 40%, rgba(253,224,71,0.4) 0%, transparent 100%),
-              radial-gradient(1px 1px at 40% 50%, rgba(255,255,255,0.5) 0%, transparent 100%),
-              radial-gradient(1.5px 1.5px at 65% 45%, rgba(253,224,71,0.5) 0%, transparent 100%),
-              radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,0.4) 0%, transparent 100%),
-              radial-gradient(1px 1px at 20% 60%, rgba(253,224,71,0.6) 0%, transparent 100%),
-              radial-gradient(1.5px 1.5px at 45% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),
-              radial-gradient(1px 1px at 75% 65%, rgba(253,224,71,0.4) 0%, transparent 100%),
-              radial-gradient(1px 1px at 5% 80%, rgba(253,224,71,0.5) 0%, transparent 100%),
-              radial-gradient(1.5px 1.5px at 35% 85%, rgba(255,255,255,0.6) 0%, transparent 100%),
-              radial-gradient(1px 1px at 60% 90%, rgba(253,224,71,0.4) 0%, transparent 100%),
-              radial-gradient(1px 1px at 95% 75%, rgba(255,255,255,0.5) 0%, transparent 100%),
-              radial-gradient(1px 1px at 25% 95%, rgba(253,224,71,0.5) 0%, transparent 100%)
-            `,
-            backgroundSize: '100% 100%'
-          }}
-        />
+        {/* Starfield background (optimized) */}
+        <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay shadow-inner" />
 
         {/* Zodiac constellation symbols - subtle decorative */}
         <div className="absolute inset-0 pointer-events-none opacity-15">
@@ -229,6 +208,8 @@ export default function HomePage() {
               src="https://scontent.fbkk23-1.fna.fbcdn.net/v/t39.30808-6/481981646_122204305784220970_4827353594584458304_n.png?_nc_cat=108&ccb=1-7&_nc_sid=2a1932&_nc_ohc=DTaoI8kf_0AQ7kNvwEFLMEg&_nc_oc=AdrFeJ7ABlZMwSqJU-0VrlRH7D4-PbL2KDJy5K1CPuGy9DVFXIyFxZhAaSeQh53i8ag&_nc_zt=23&_nc_ht=scontent.fbkk23-1.fna&_nc_gid=uPj774V_SqUqDBR7mngWeg&_nc_ss=7a3a8&oh=00_Afwxljy75y7Zp80ANCap83Cdgd2z_Dw4KBJJjFv4DpRjIw&oe=69D03733"
               alt="รุทสะกิดดาว - ดูดวงไพ่ทาโรต์ โหราศาสตร์ยูเรเนียน"
               className="w-full h-auto object-cover"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-cosmic-950/90 via-cosmic-950/40 to-transparent flex items-end">
               <div className="p-6 sm:p-10 text-left">
@@ -256,7 +237,9 @@ export default function HomePage() {
               อ่านทั้งหมด <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <ArticleList />
+          <Suspense fallback={<div className="h-64 flex items-center justify-center text-cosmic-400 animate-pulse">กำลังโหลดบทความ...</div>}>
+            <ArticleList />
+          </Suspense>
           <div className="mt-10 text-center sm:hidden">
             <Link to="/articles" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-cosmic-600 bg-cosmic-900/50 text-sm font-medium text-white hover:bg-cosmic-800 transition-colors">
               อ่านบทความทั้งหมด <ArrowRight className="w-4 h-4" />
