@@ -44,10 +44,23 @@ export const historyService = {
     }
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as ReadingHistory));
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      const timestamp = data.timestamp;
+      let timestampStr: string;
+      
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
+        timestampStr = (timestamp as any).toDate().toISOString();
+      } else {
+        timestampStr = timestamp as string || new Date().toISOString();
+      }
+      
+      return {
+        id: doc.id,
+        ...data,
+        timestamp: timestampStr
+      } as ReadingHistory;
+    });
   },
 
   async getReading(readingId: string): Promise<ReadingHistory | null> {
