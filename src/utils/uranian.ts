@@ -87,24 +87,57 @@ export async function getUranianReading(data: UranianData): Promise<string> {
       chartDataStr = "ข้อมูลดาวบนท้องฟ้า ณ เวลาเกิด (จากการคำนวณจริง):\n\n";
       
       if (chartJson.six_points_identity) {
-        chartDataStr += "[จุดสำคัญ]\n";
+        chartDataStr += "【จุดสำคัญ 6 จุด (Six Points Identity)】\n";
         for (const [key, val] of Object.entries(chartJson.six_points_identity)) {
-          chartDataStr += `- ${key}: ${(val as any).sign}\n`;
+          const sign = (val as any).sign || '';
+          const degree = (val as any).degree || '';
+          const minute = (val as any).minute || '';
+          chartDataStr += `- ${key}: ${sign} ${degree}°${minute}'\n`;
         }
       }
       
       if (chartJson.planets && Object.keys(chartJson.planets).length > 0) {
-        chartDataStr += "\n[ตำแหน่งดาวและราศี]\n";
+        chartDataStr += "\n【ดาวเคราะห์และตำแหน่งในราศี】\n";
         for (const [planet, data] of Object.entries(chartJson.planets)) {
-          chartDataStr += `- ${planet}: ${(data as any).sign}\n`;
+          const sign = (data as any).sign || '';
+          const degree = (data as any).degree || '';
+          const minute = (data as any).minute || '';
+          const house = (data as any).house ? ` (เรือน ${(data as any).house})` : '';
+          chartDataStr += `- ${planet}: ${sign} ${degree}°${minute}'${house}\n`;
+        }
+      }
+
+      if (chartJson.houses && Object.keys(chartJson.houses).length > 0) {
+        chartDataStr += "\n【เรือนชะตา (Houses)】\n";
+        for (const [house, data] of Object.entries(chartJson.houses)) {
+          const sign = (data as any).sign || '';
+          const degree = (data as any).degree || '';
+          const minute = (data as any).minute || '';
+          chartDataStr += `- เรือน ${house}: ${sign} ${degree}°${minute}'\n`;
+        }
+      }
+
+      if (chartJson.aspects && chartJson.aspects.length > 0) {
+        chartDataStr += "\n【มุมสัมพันธ์ระหว่างดาว (Aspects)】\n";
+        for (const a of chartJson.aspects) {
+          chartDataStr += `- ${a.planet1} ${a.aspect} ${a.planet2} (${a.orb}°)\n`;
         }
       }
 
       if (chartJson.midpoints && chartJson.midpoints.length > 0) {
-        chartDataStr += "\n[จุดศูนย์รังสี (Midpoints)]\n";
-        for (const m of chartJson.midpoints.slice(0, 15)) {
+        chartDataStr += "\n【จุดศูนย์รังสี (Midpoints)】\n";
+        chartDataStr += "การวิเคราะห์: จุดกึ่งกลางระหว่างดาว 2 ดวง หากมีดาวดวงอื่นมาสัมผัสจะเกิดพลังพิเศษ\n";
+        for (const m of chartJson.midpoints) {
           const atMp = m.at_midpoint.map((a: any) => a.planet).join(", ");
-          chartDataStr += `- ${m.planets} = ${m.midpoint_sign} (สัมพันธ์: ${atMp})\n`;
+          chartDataStr += `- ${m.planets} = ${m.midpoint_sign} (ดาวสัมผัส: ${atMp || 'ไม่มี'})\n`;
+        }
+      }
+
+      if (chartJson.planetary_pictures && chartJson.planetary_pictures.length > 0) {
+        chartDataStr += "\n【ภาพดาว (Planetary Pictures)】\n";
+        chartDataStr += "ภาพดาวคือรูปแบบพิเศษของจุดศูนย์รังสีที่มีดาว 2 ดวงมาสัมผัส แสดงถึงพลังงานเฉพาะทาง:\n";
+        for (const p of chartJson.planetary_pictures.slice(0, 20)) {
+          chartDataStr += `- ${p.picture}: ${p.interpretation}\n`;
         }
       }
     } else if (chartRes.status === 401 || chartRes.status === 403) {
@@ -209,41 +242,47 @@ ${chartDataStr}
             role: 'system',
             content: `คุณเป็นโหรผู้เชี่ยวชาญด้านโหราศาสตร์ยูเรเนียน (Uranian Astrology) ที่มีความเชี่ยวชาญสูง
 
-หลักการทำนายตามโหราศาสตร์ยูเรเนียน:
+ให้คุณวิเคราะห์ดวงชะตาอย่างละเอียดและครบถ้วน โดยอิงจากข้อมูลดาวที่ได้รับมา:
 
-1. **จุดสำคัญ 6 จุด (Six Points Identity)**:
-   - MC (Medium Coeli) - จุดสูงสุดของชีวิต อาชีพ เป้าหมาย
-   - ASC (Ascendant) - บุคลิกภาพภายนอก การแสดงออก
-   - Sun (ดวงอาทิตย์) - ตัวตนแก่นแท้ พลังชีวิต
-   - Moon (ดวงจันทร์) - อารมณ์ จิตใจ ความทรงจำ
-   - North Node (ดวงจันทร์โหนดเหนือ) - การเติบโตทางจิตวิญญาณ
-   - Vertex (เวอร์เทกซ์) - จุดที่ชะตากรรมพบกับโชคชะตา
+【1. จุดสำคัญ 6 จุด (Six Points Identity)】
+วิเคราะห์ MC, ASC, Sun, Moon, North Node, Vertex ว่าอยู่ราศีอะไร และส่งผลต่อชีวิตด้านใด
 
-2. **การวิเคราะห์ Midpoints (จุดศูนย์รังสี)**:
-   - Midpoints คือจุดกึ่งกลางระหว่างดาว 2 ดวง
-   - เมื่อดาวดวงอื่นมาสัมผัส midpoint จะเกิดพลังพิเศษ
-   - ให้วิเคราะห์ midpoints ที่มีดาวมาสัมผัส โดยเฉพาะดาวซึ่งอยู่ใกล้ midpoint ภายใน 1 องศา
+【2. ดาวเคราะห์ในราศีและเรือน】
+วิเคราะห์ดาวแต่ละดวงว่าอยู่ราศีอะไร เรือนอะไร เจ้าเรือนคือดาวอะไร มีพลังอย่างไร
 
-3. **Planetary Pictures (ภาพดาว)**:
-   - คือรูปแบบพิเศษของ midpoints ที่มีดาว 2 ดวงมาสัมผัส midpoint
-   - แสดงถึงพลังงานเฉพาะทางที่ต้องใช้ชีวิต
+【3. มุมสัมพันธ์ (Aspects)】
+วิเคราะห์มุมสัมพันธ์ระหว่างดาว เช่น conjunction, opposition, square, trine, sextile ส่งผลอย่างไร
 
-4. **Aspects (มุมสัมพันธ์)**:
-   - มุมสัมพันธ์ระหว่างดาวแสดงถึงความสัมพันธ์พลังงาน
+【4. จุดศูนย์รังสี (Midpoints)】
+วิเคราะห์จุดศูนย์รังสีที่มีดาวสัมผัส บ่งบอกถึงพลังพิเศษด้านใด
 
-5. **วิธีเขียนคำทำนาย**:
-   - ให้คำทำนายเป็นภาษาไทย
-   - อธิบายลักษณะนิสัย จุดแข็ง จุดอ่อน
-   - ให้คำแนะนำสำหรับการใช้ชีวิตและการพัฒนาตนเอง
-   - เขียนเป็นย่อหน้าต่อเนื่อง ไม่ต้องมีหัวข้อ
-   - ใช้ข้อมูลดาวที่ได้รับมาวิเคราะห์ตามหลักการข้างต้นเท่านั้น`
+【5. ภาพดาว (Planetary Pictures)】
+วิเคราะห์ภาพดาวที่เกิดขึ้น แสดงถึงพลังงานเฉพาะทางอะไร
+
+【6. เรือนชะตา (Houses)】
+วิเคราะห์เรือนแต่ละเรือนว่ามีดาวอะไรสถิต ส่งผลต่อด้านชีวิตอะไร
+
+【7. การวิเคราะห์ด้านต่างๆ】
+- ลักษณะนิสัย บุคลิกภาพ
+- ความรัก ความสัมพันธ์
+- การงาน อาชีพ
+- การเงิน ทรัพย์สิน
+- สุขภาพ
+- การเติบโตทางจิตวิญญาณ
+
+【รูปแบบการตอบ】
+- ใช้ภาษาไทย
+- เขียนให้ครบถ้วน ละเอียด เจาะลึก
+- อ้างอิงข้อมูลดาวที่ได้รับก่อนแปลความหมาย
+- ใช้ emoji ประกอบให้สวยงาม
+- แบ่งเป็นหัวข้อชัดเจน`
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        max_tokens: 3000,
+        max_tokens: 8000,
         temperature: 0.7,
       }),
     });
