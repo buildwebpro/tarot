@@ -73,7 +73,7 @@ function App() {
               <Route path="/uranian" element={<UranianPage />} />
               <Route path="/articles" element={<ArticlesPage />} />
               <Route path="/articles/:slug" element={<ArticleDetailPage />} />
-              {/* ซ่อนชั่วคราว: <Route path="/history" element={<HistoryPage />} /> */}
+              <Route path="/history" element={<HistoryPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/admin" element={<AdminPage />} />

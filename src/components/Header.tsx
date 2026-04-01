@@ -140,7 +140,6 @@ export function Header() {
 
             <Link to="/articles" className={navLinkClass('/articles')}>บทความ</Link>
             <Link to="/pricing" className={navLinkClass('/pricing')}>ค่าบริการ</Link>
-            {/* ซ่อนชั่วคราว: <Link to="/history" className={navLinkClass('/history')}>ประวัติ</Link> */}
             {isAdmin && (
               <Link to="/admin" className={navLinkClass('/admin')}>
                 <span className="flex items-center gap-1">
