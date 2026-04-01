@@ -14,6 +14,7 @@ export default function HistoryPage() {
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'tarot' | 'uranian' | 'zodiac'>('uranian');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     loadHistory();
@@ -61,10 +62,26 @@ export default function HistoryPage() {
       tarot: 'ไพ่ทาโรต์',
       uranian: 'ยูเรเนียน',
       zodiac: 'ดูดวงราศี',
-      celtic_cross: 'Celtic Cross',
     };
     return map[type] || type;
   };
+
+  const formatDate = (timestamp: string) => {
+    if (!timestamp) return 'ไม่ระบุ';
+    try {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) return 'ไม่ระบุ';
+      return date.toLocaleString('th-TH', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return 'ไม่ระบุ';
+    }
+  };  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -138,7 +155,8 @@ export default function HistoryPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
-                  className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/15 transition-colors"
+                  className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/15 transition-colors cursor-pointer"
+                  onClick={() => setExpandedId(expandedId === reading.id ? null : reading.id)}
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -148,14 +166,17 @@ export default function HistoryPage() {
                           {getTypeLabel(reading.type)}
                         </span>
                         <p className="text-purple-300 text-xs mt-1">
-                          {new Date(reading.timestamp).toLocaleString('th-TH')}
+                          {formatDate(reading.timestamp)}
                         </p>
                       </div>
                     </div>
                     
                     {isAuthenticated && (
                       <button
-                        onClick={() => handleDelete(reading.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(reading.id);
+                        }}
                         className="text-purple-400 hover:text-red-400 transition-colors p-2"
                         title="ลบ"
                       >
@@ -180,9 +201,12 @@ export default function HistoryPage() {
                     </div>
                   )}
 
-                  <p className="text-purple-100 whitespace-pre-line line-clamp-4 text-sm leading-relaxed">
+                  <div className={`text-purple-100 whitespace-pre-line ${expandedId === reading.id ? '' : 'line-clamp-4'} text-sm leading-relaxed`}>
                     {reading.reading}
-                  </p>
+                  </div>
+                  {expandedId !== reading.id && (
+                    <p className="text-purple-400 text-xs mt-2 text-center">คลิกเพื่อดูเพิ่มเติม</p>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

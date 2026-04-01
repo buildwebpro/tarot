@@ -237,8 +237,14 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-purple-800 disabled:to-indigo-800 disabled:cursor-not-allowed rounded-lg font-semibold transition-all transform hover:scale-[1.02]"
+              disabled={isLoading || (!isAuthenticated) || (!isPremium && (userProfile?.credits || 0) < 1)}
+              className={`w-full py-4 rounded-lg font-semibold transition-all transform hover:scale-[1.02] ${
+                !isAuthenticated || (!isPremium && (userProfile?.credits || 0) < 1)
+                  ? 'bg-gray-600 cursor-not-allowed opacity-50'
+                  : isLoading
+                    ? 'bg-gradient-to-r from-purple-800 to-indigo-800 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+              }`}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -247,6 +253,10 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
                   <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.4s]" />
                   {status || 'กำลังคำนวณ...'}
                 </span>
+              ) : !isAuthenticated ? (
+                'ต้องเข้าสู่ระบบ'
+              ) : !isPremium && (userProfile?.credits || 0) < 1 ? (
+                'ไม่มีเครดิต'
               ) : (
                 'เปิดคำทำนาย'
               )}
