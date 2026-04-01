@@ -189,9 +189,19 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
             </div>
 
             {error && (
-              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-red-200 text-sm">
-                {error}
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-red-200 text-sm"
+              >
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">⚠️</span>
+                  <div>
+                    <p className="font-medium">เกิดข้อผิดพลาด</p>
+                    <p className="mt-1">{error}</p>
+                  </div>
+                </div>
+              </motion.div>
             )}
 
             <button

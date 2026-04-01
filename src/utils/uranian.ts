@@ -6,6 +6,40 @@ interface UranianData {
   onProgress?: (status: string) => void;
 }
 
+class UranianError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public isRetryable: boolean = true
+  ) {
+    super(message);
+    this.name = 'UranianError';
+  }
+}
+
+const ERROR_MESSAGES: Record<string, { th: string; isRetryable: boolean }> = {
+  CHART_API_FAILED: {
+    th: 'ไม่สามารถดึงข้อมูลผังดวงชะตาได้ กรุณาลองใหม่ภายหลัง',
+    isRetryable: true
+  },
+  CHART_API_NETWORK: {
+    th: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ดวงชะตา กรุณาตรวจสอบอินเทอร์เน็ต',
+    isRetryable: true
+  },
+  MINIMAX_API_FAILED: {
+    th: 'ไม่สามารถสร้างคำทำนายได้ในขณะนี้ กรุณาลองใหม่ภายหลัง',
+    isRetryable: true
+  },
+  MINIMAX_API_KEY: {
+    th: 'ระบบ AI กำลังมีปัญหา กรุณาติดต่อผู้ดูแลระบบ',
+    isRetryable: false
+  },
+  MINIMAX_NETWORK: {
+    th: 'ไม่สามารถเชื่อมต่อกับระบบ AI ได้ กรุณาตรวจสอบอินเทอร์เน็ต',
+    isRetryable: true
+  },
+};
+
 // Helper to get lat/lon from place name using OpenStreetMap Nominatim
 async function getCoordinates(place: string): Promise<{ lat: number, lon: number } | null> {
   try {
@@ -42,9 +76,11 @@ export async function getUranianReading(data: UranianData): Promise<string> {
   // 2. Fetch Chart Data from API
   data.onProgress?.('กำลังคำนวณผังดวงชะตาด้วยดาราศาสตร์ (Swiss Ephemeris)...');
   let chartDataStr = "";
+  let chartApiError: UranianError | null = null;
   try {
-    const apiUrl = import.meta.env.VITE_ASTROLOGY_API_URL || 'https://astrology.buildweb.pro';
-    const chartRes = await fetch(`${apiUrl}/chart?date=${data.birthDate}&time=${data.birthTime}&lat=${lat}&lon=${lon}`);
+    const isDev = import.meta.env.DEV;
+    const apiBase = isDev ? '/api/astrology' : (import.meta.env.VITE_ASTROLOGY_API_URL || 'https://astrology.buildweb.pro');
+    const chartRes = await fetch(`${apiBase}/chart?date=${data.birthDate}&time=${data.birthTime}&lat=${lat}&lon=${lon}&tz=7`);
     if (chartRes.ok) {
       const chartJson = await chartRes.json();
       
@@ -57,10 +93,10 @@ export async function getUranianReading(data: UranianData): Promise<string> {
         }
       }
       
-      if (chartJson.planets_sorted) {
-        chartDataStr += "\n[ตำแหน่งดาวและเรือนชะตา]\n";
-        for (const p of chartJson.planets_sorted) {
-          chartDataStr += `- ${p.name} (${p.symbol}): ราศี ${p.sign} (เรือนที่ ${p.house})\n`;
+      if (chartJson.planets && Object.keys(chartJson.planets).length > 0) {
+        chartDataStr += "\n[ตำแหน่งดาวและราศี]\n";
+        for (const [planet, data] of Object.entries(chartJson.planets)) {
+          chartDataStr += `- ${planet}: ${(data as any).sign}\n`;
         }
       }
 
@@ -71,12 +107,37 @@ export async function getUranianReading(data: UranianData): Promise<string> {
           chartDataStr += `- ${m.planets} = ${m.midpoint_sign} (สัมพันธ์: ${atMp})\n`;
         }
       }
+    } else if (chartRes.status === 401 || chartRes.status === 403) {
+      chartApiError = new UranianError(
+        'Chart API authentication failed',
+        'CHART_API_FAILED',
+        false
+      );
+      throw chartApiError;
     } else {
-      throw new Error(`API returned ${chartRes.status}`);
+      chartApiError = new UranianError(
+        `Chart API returned ${chartRes.status}`,
+        'CHART_API_FAILED',
+        true
+      );
+      throw chartApiError;
     }
   } catch (error) {
-    console.error("Chart API error:", error);
-    data.onProgress?.('พบปัญหาการดึงข้อมูลดาว... ระบบจะใช้การคำนวณหลักการพื้นฐานแทน...');
+    if (error instanceof UranianError) {
+      console.error("Chart API error:", error.message);
+    } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      chartApiError = new UranianError(
+        'Network error: Cannot connect to chart API',
+        'CHART_API_NETWORK',
+        true
+      );
+      console.error("Chart API network error:", error);
+    } else {
+      console.error("Chart API error:", error);
+    }
+    if (chartApiError) {
+      data.onProgress?.('พบปัญหาการดึงข้อมูลดาว... ระบบจะใช้การคำนวณหลักการพื้นฐานแทน...');
+    }
     await new Promise(r => setTimeout(r, 1500));
   }
 
@@ -132,15 +193,17 @@ ${chartDataStr}
 - ใช้ emoji เพื่อความสวยงามและเข้าใจง่าย`;
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const apiUrl = import.meta.env.VITE_MINIMAX_API_URL || 'https://api.minimax.io/v1/text/chatcompletion_v2';
+    const apiKey = import.meta.env.VITE_MINIMAX_API_KEY;
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-        'HTTP-Referer': window.location.origin,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat',
+        model: 'MiniMax-M2.7',
         messages: [
           {
             role: 'system',
@@ -157,13 +220,35 @@ ${chartDataStr}
     });
 
     if (!response.ok) {
-      throw new Error('API request failed');
+      if (response.status === 401 || response.status === 403) {
+        throw new UranianError(
+          'MiniMax API key is invalid or expired',
+          'MINIMAX_API_KEY',
+          false
+        );
+      }
+      throw new UranianError(
+        `MiniMax API returned ${response.status}`,
+        'MINIMAX_API_FAILED',
+        true
+      );
     }
 
     const resData = await response.json();
     return resData.choices[0].message.content || 'ขออภัย ไม่สามารถทำนายได้ในขณะนี้';
   } catch (error) {
+    if (error instanceof UranianError) {
+      console.error('Uranian API error:', error.message);
+      const errorInfo = ERROR_MESSAGES[error.code];
+      if (errorInfo) {
+        throw new Error(errorInfo.th);
+      }
+      throw new Error(error.message);
+    } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('MiniMax network error:', error);
+      throw new Error(ERROR_MESSAGES.MINIMAX_NETWORK.th);
+    }
     console.error('Error getting Uranian reading:', error);
-    return 'ขออภัย เกิดข้อผิดพลาดในการเชื่อมต่อกับระบบ AI กรุณาลองใหม่อีกครั้ง';
+    throw new Error('เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง');
   }
 }
