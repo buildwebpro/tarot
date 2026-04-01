@@ -13,7 +13,7 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<ReadingHistory[]>([]);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'tarot' | 'uranian' | 'zodiac'>('all');
+  const [filter, setFilter] = useState<'all' | 'tarot' | 'uranian' | 'zodiac'>('uranian');
 
   useEffect(() => {
     loadHistory();
@@ -103,27 +103,10 @@ export default function HistoryPage() {
           <h1 className="text-4xl font-bold mb-4">ประวัติการดูดวง</h1>
           <p className="text-lg text-purple-200">
             {isAuthenticated
-              ? 'ประวัติการดูดวงทั้งหมดของคุณ'
+              ? 'ประวัติการดูดวงโหราศาสตร์ยูเรเนียนของคุณ'
               : 'เข้าสู่ระบบเพื่อบันทึกประวัติการดูดวงแบบถาวร'}
           </p>
         </header>
-
-        {/* Filter */}
-        <div className="flex justify-center gap-3 mb-8 flex-wrap">
-          {(['all', 'tarot', 'uranian', 'zodiac'] as const).map((type) => (
-            <button
-              key={type}
-              onClick={() => setFilter(type)}
-              className={`px-4 py-2 rounded-lg transition-colors text-sm ${
-                filter === type
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-purple-800/50 text-purple-200 hover:bg-purple-700'
-              }`}
-            >
-              {type === 'all' ? 'ทั้งหมด' : getTypeLabel(type)}
-            </button>
-          ))}
-        </div>
 
         {/* History List */}
         {loading ? (

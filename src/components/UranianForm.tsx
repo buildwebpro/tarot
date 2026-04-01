@@ -21,6 +21,8 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
   const [error, setError] = useState('');
   const [reading, setReading] = useState('');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showSavedMessage, setShowSavedMessage] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const checkReadingLimit = async (): Promise<boolean> => {
     if (!isAuthenticated) {
@@ -56,30 +58,6 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
 
       setReading(reading);
       onReadingComplete?.(reading);
-
-      // Save to history
-      if (user) {
-        await historyService.saveReading({
-          userId: user.uid,
-          type: 'uranian',
-          timestamp: new Date().toISOString(),
-          reading,
-          details: {
-            birthData: {
-              date: birthDate,
-              time: birthTime,
-              place: birthPlace,
-            },
-          },
-          isPremium: false,
-        });
-
-        // Deduct credit if not premium
-        if (!isPremium) {
-          await usersService.deductCredit(user.uid);
-        }
-        await refreshProfile();
-      }
     } catch (err: any) {
       setError(err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
     } finally {
@@ -93,6 +71,40 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
     setBirthTime('');
     setBirthPlace('');
     setQuestion('');
+    setShowSavedMessage(false);
+  };
+
+  const handleSaveToHistory = async () => {
+    if (!user || !reading || !birthDate || !birthTime || !birthPlace) return;
+    
+    setIsSaving(true);
+    try {
+      await historyService.saveReading({
+        userId: user.uid,
+        type: 'uranian',
+        timestamp: new Date().toISOString(),
+        reading,
+        details: {
+          birthData: {
+            date: birthDate,
+            time: birthTime,
+            place: birthPlace,
+          },
+        },
+        isPremium: false,
+      });
+
+      await usersService.deductCredit(user.uid);
+      await refreshProfile();
+
+      setShowSavedMessage(true);
+      setTimeout(() => setShowSavedMessage(false), 3000);
+    } catch (err) {
+      console.error('Error saving to history:', err);
+      setError('ไม่สามารถบันทึกคำทำนายได้');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (reading) {
@@ -112,7 +124,17 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
               {reading}
             </p>
           </div>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+            {user && (
+              <button
+                onClick={handleSaveToHistory}
+                disabled={isSaving}
+                className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 rounded-lg font-semibold transition-colors flex items-center gap-2"
+              >
+                <span>💾</span>
+                {isSaving ? 'กำลังบันทึก...' : 'บันทึกคำทำนาย'}
+              </button>
+            )}
             <button
               onClick={handleReset}
               className="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
@@ -120,6 +142,15 @@ export function UranianForm({ onReadingComplete }: UranianFormProps) {
               ทำนายดวงใหม่
             </button>
           </div>
+          {showSavedMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-center text-green-200"
+            >
+              ✅ บันทึกคำทำนายสำเร็จ!
+            </motion.div>
+          )}
         </div>
       </motion.div>
     );
