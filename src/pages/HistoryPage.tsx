@@ -81,7 +81,7 @@ export default function HistoryPage() {
     } catch {
       return 'ไม่ระบุ';
     }
-  };  };
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
