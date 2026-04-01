@@ -11,7 +11,7 @@ const HoroscopePage    = lazy(() => import('./pages/HoroscopePage'));
 const UranianPage      = lazy(() => import('./pages/UranianPage'));
 const ArticlesPage     = lazy(() => import('./pages/ArticlesPage'));
 const ArticleDetailPage= lazy(() => import('./pages/ArticleDetailPage'));
-// ซ่อนชั่วคราว: const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const HistoryPage        = lazy(() => import('./pages/HistoryPage'));
 const ProfilePage      = lazy(() => import('./pages/ProfilePage'));
 const LoginPage        = lazy(() => import('./pages/LoginPage'));
 const AdminPage        = lazy(() => import('./pages/AdminPage'));
