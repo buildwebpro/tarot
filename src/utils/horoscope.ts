@@ -1,10 +1,10 @@
 import { dailyPredictions } from '../data/horoscope/dailyPredictions';
 import { zodiacSigns } from '../data/zodiac';
-import { saveReading } from './history';
+import { saveReading, saveReadingToFirestore } from './history';
 import { generateHoroscopeReading } from './aiHoroscope';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function getDailyHoroscope(sign: string): Promise<string> {
+export async function getDailyHoroscope(sign: string, userId?: string): Promise<string> {
   try {
     const predictions = dailyPredictions[sign];
     if (!predictions) {
@@ -20,16 +20,22 @@ export async function getDailyHoroscope(sign: string): Promise<string> {
     const reading = await generateHoroscopeReading(sign, thaiName, element);
 
     // บันทึกประวัติ
-    saveReading({
+    const readingData = {
       id: uuidv4(),
       timestamp: new Date().toISOString(),
-      type: 'zodiac',
+      type: 'zodiac' as const,
       reading,
       details: {
         sign,
         thaiName
       }
-    });
+    };
+    
+    saveReading(readingData);
+    
+    if (userId) {
+      await saveReadingToFirestore(readingData, userId);
+    }
 
     return reading;
   } catch (error) {
@@ -66,16 +72,22 @@ ${randomPrediction(predictions.health)}
 ⏰ เวลามงคล: ${luckyTime}
       `;
 
-      saveReading({
+      const fallbackData = {
         id: uuidv4(),
         timestamp: new Date().toISOString(),
-        type: 'zodiac',
+        type: 'zodiac' as const,
         reading: fallbackReading,
         details: {
           sign,
           thaiName: zodiacSign?.thaiName
         }
-      });
+      };
+
+      saveReading(fallbackData);
+
+      if (userId) {
+        await saveReadingToFirestore(fallbackData, userId);
+      }
 
       return fallbackReading;
     } catch (fallbackError) {

@@ -4,6 +4,7 @@ import { zodiacSigns } from '../data/zodiac';
 import { getDailyHoroscope } from '../utils/horoscope';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
+import { useAuth } from '../contexts/AuthContext';
 
 interface HoroscopeModalProps {
   sign: string;
@@ -11,6 +12,7 @@ interface HoroscopeModalProps {
 }
 
 export function HoroscopeModal({ sign, onClose }: HoroscopeModalProps) {
+  const { user } = useAuth();
   const [horoscope, setHoroscope] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ export function HoroscopeModal({ sign, onClose }: HoroscopeModalProps) {
       try {
         setIsLoading(true);
         setError(null);
-        const reading = await getDailyHoroscope(sign);
+        const reading = await getDailyHoroscope(sign, user?.uid);
         setHoroscope(reading);
       } catch (error) {
         setError('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');

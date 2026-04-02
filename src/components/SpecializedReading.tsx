@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 import { Heart, Briefcase, Coins, Activity, Sparkles, Loader2 } from 'lucide-react';
 import { TarotCard } from './TarotCard';
 import { tarotDeck } from '../data/tarotDeck';
-import { saveReading } from '../utils/history';
+import { saveReading, saveReadingToFirestore } from '../utils/history';
 import { v4 as uuidv4 } from 'uuid';
 import type { Card } from '../types/tarot';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_URL = import.meta.env.VITE_MINIMAX_API_URL || 'https://api.minimax.io/v1/text/chatcompletion_v2';
 const API_KEY = import.meta.env.VITE_MINIMAX_API_KEY;
@@ -47,6 +48,7 @@ const readingTypes = [
 ];
 
 export function SpecializedReading() {
+  const { user } = useAuth();
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [isReversed, setIsReversed] = useState<boolean[]>([]);
@@ -75,13 +77,13 @@ export function SpecializedReading() {
     setIsReversed([...isReversed, isCardReversed]);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (!selectedType) return;
     
-    saveReading({
+    const readingData = {
       id: uuidv4(),
       timestamp: new Date().toISOString(),
-      type: 'tarot',
+      type: 'tarot' as const,
       reading: `การทำนายเฉพาะด้าน: ${readingTypes.find(t => t.id === selectedType)?.name}`,
       details: {
         cards: selectedCards.map((card, index) => ({
@@ -90,7 +92,13 @@ export function SpecializedReading() {
         })),
         specializedType: selectedType
       }
-    });
+    };
+    
+    saveReading(readingData);
+    
+    if (user?.uid) {
+      await saveReadingToFirestore(readingData, user.uid);
+    }
   };
 
   const resetReading = () => {

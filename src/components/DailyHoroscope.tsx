@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { zodiacSigns } from '../data/zodiac';
+import { getDailyHoroscope } from '../utils/horoscope';
+import { useAuth } from '../contexts/AuthContext';
 
 interface DailyHoroscopeProps {
   onClose: () => void;
 }
 
 export function DailyHoroscope({ onClose }: DailyHoroscopeProps) {
+  const { user } = useAuth();
   const [selectedSign, setSelectedSign] = useState<string | null>(null);
   const [horoscope, setHoroscope] = useState<string>('');
 
   const handleSelectSign = async (sign: string) => {
     setSelectedSign(sign);
-    // TODO: เพิ่มฟังก์ชันทำนายดวงรายวัน
-    const dailyReading = await getDailyHoroscope(sign);
+    const dailyReading = await getDailyHoroscope(sign, user?.uid);
     setHoroscope(dailyReading);
   };
 

@@ -3,10 +3,11 @@ import { motion } from 'framer-motion';
 import { RotateCcw, Sparkles, Loader2 } from 'lucide-react';
 import { tarotDeck } from '../data/tarotDeck';
 import { TarotCard } from './TarotCard';
-import { saveReading } from '../utils/history';
+import { saveReading, saveReadingToFirestore } from '../utils/history';
 import { generateTarotReading } from '../utils/openrouter';
 import { v4 as uuidv4 } from 'uuid';
 import type { Card } from '../types/tarot';
+import { useAuth } from '../contexts/AuthContext';
 
 const POSITIONS = [
   { id: 0, name: 'สถานการณ์ปัจจุบัน', gridArea: '3/4/4/5', zIndex: 1 },
@@ -22,6 +23,7 @@ const POSITIONS = [
 ];
 
 export function CelticCrossReading() {
+  const { user } = useAuth();
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [isReversed, setIsReversed] = useState<boolean[]>([]);
   const [isReading, setIsReading] = useState(false);
@@ -47,11 +49,10 @@ export function CelticCrossReading() {
     setIsLoadingAI(true);
     setAiReading('');
 
-    // บันทึกประวัติ
-    saveReading({
+    const readingData = {
       id: uuidv4(),
       timestamp: new Date().toISOString(),
-      type: 'tarot',
+      type: 'tarot' as const,
       reading: 'Celtic Cross Reading',
       details: {
         cards: selectedCards.map((card, index) => ({
@@ -60,7 +61,13 @@ export function CelticCrossReading() {
           isReversed: isReversed[index]
         }))
       }
-    });
+    };
+
+    saveReading(readingData);
+
+    if (user?.uid) {
+      await saveReadingToFirestore(readingData, user.uid);
+    }
 
     // เรียก AI ทำนาย
     const cardsData = selectedCards.map((card, index) => ({

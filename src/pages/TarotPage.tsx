@@ -6,12 +6,14 @@ import { TarotCard } from '../components/TarotCard';
 import { tarotDeck } from '../data/tarotDeck';
 import { getTarotReading } from '../utils/openai';
 import type { Card } from '../types/tarot';
-import { saveReading } from '../utils/history';
+import { saveReading, saveReadingToFirestore } from '../utils/history';
 import { v4 as uuidv4 } from 'uuid';
 import { CelticCrossReading } from '../components/CelticCrossReading';
 import { SpecializedReading } from '../components/SpecializedReading';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function TarotPage() {
+  const { user } = useAuth();
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [isReversed, setIsReversed] = useState<boolean[]>([]);
   const [reading, setReading] = useState<string>('');
@@ -36,10 +38,11 @@ export default function TarotPage() {
       try {
         const interpretation = await getTarotReading([...selectedCards, randomCard], [...isReversed, isCardReversed]);
         setReading(interpretation);
-        saveReading({
+        
+        const readingData = {
           id: uuidv4(),
           timestamp: new Date().toISOString(),
-          type: 'tarot',
+          type: 'tarot' as const,
           reading: interpretation,
           details: {
             cards: [...selectedCards, randomCard].map((card, index) => ({
@@ -47,7 +50,13 @@ export default function TarotPage() {
               isReversed: [...isReversed, isCardReversed][index]
             }))
           }
-        });
+        };
+        
+        saveReading(readingData);
+        
+        if (user?.uid) {
+          await saveReadingToFirestore(readingData, user.uid);
+        }
       } catch {
         setError('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
       } finally {

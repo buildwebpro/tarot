@@ -1,5 +1,9 @@
+import { collection, addDoc, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
+import { db } from '../config/firebase';
+
 interface ReadingHistory {
   id: string;
+  userId?: string;
   timestamp: string;
   type: 'tarot' | 'zodiac';
   reading: string;
@@ -24,6 +28,20 @@ export const saveReading = (reading: ReadingHistory) => {
   }
 };
 
+export const saveReadingToFirestore = async (reading: ReadingHistory, userId: string) => {
+  try {
+    const docRef = await addDoc(collection(db, 'history'), {
+      ...reading,
+      userId,
+      timestamp: Timestamp.now(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error saving reading to Firestore:', error);
+    throw error;
+  }
+};
+
 export const getHistory = (): ReadingHistory[] => {
   try {
     return JSON.parse(localStorage.getItem('readings') || '[]');
@@ -31,4 +49,4 @@ export const getHistory = (): ReadingHistory[] => {
     console.error('Error getting history:', error);
     return [];
   }
-}; 
+};
