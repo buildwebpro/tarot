@@ -37,4 +37,10 @@ export const usersService = {
   async deleteUser(uid: string): Promise<void> {
     await deleteDoc(doc(db, 'users', uid));
   },
+
+  async updateUserCredits(uid: string, credits: number): Promise<void> {
+    await updateDoc(doc(db, 'users', uid), {
+      credits: credits,
+    });
+  },
 };

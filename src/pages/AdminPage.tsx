@@ -21,6 +21,8 @@ export default function AdminPage() {
   const [allReadings, setAllReadings] = useState<ReadingHistory[]>([]);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [topUpLoading, setTopUpLoading] = useState(false);
+  const [editingCredits, setEditingCredits] = useState(false);
+  const [editCreditsValue, setEditCreditsValue] = useState('');
 
   // Articles state
   const [articles, setArticles] = useState<Article[]>([]);
@@ -80,6 +82,28 @@ export default function AdminPage() {
       setTopUpAmount('');
     } catch (error) {
       console.error('Error topping up:', error);
+    } finally {
+      setTopUpLoading(false);
+    }
+  };
+
+  const handleUpdateCredits = async (targetUser: UserProfile) => {
+    const newCredits = parseInt(editCreditsValue);
+    if (isNaN(newCredits) || newCredits < 0) return;
+
+    setTopUpLoading(true);
+    try {
+      const { updateUserCredits } = await import('../services/users');
+      await updateUserCredits(targetUser.uid, newCredits);
+      await loadData();
+      if (selectedUser) {
+        const updated = users.find(u => u.uid === targetUser.uid);
+        if (updated) setSelectedUser(updated);
+      }
+      setEditingCredits(false);
+      setEditCreditsValue('');
+    } catch (error) {
+      console.error('Error updating credits:', error);
     } finally {
       setTopUpLoading(false);
     }
@@ -550,11 +574,59 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {/* Credits Info with Edit */}
+              <div className="bg-purple-900/30 rounded-xl p-4">
+                <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-stardust-400" />
+                  เครดิต
+                </h4>
+                <div className="flex items-center gap-3">
+                  {editingCredits ? (
+                    <>
+                      <input
+                        type="number"
+                        value={editCreditsValue}
+                        onChange={(e) => setEditCreditsValue(e.target.value)}
+                        placeholder="จำนวนเครดิตใหม่"
+                        className="flex-1 px-4 py-2 bg-purple-800/50 border border-purple-600/50 rounded-lg text-white placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                      />
+                      <button
+                        onClick={() => handleUpdateCredits(selectedUser)}
+                        disabled={topUpLoading || !editCreditsValue}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:from-purple-700 disabled:to-purple-800 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+                      >
+                        {topUpLoading ? 'กำลัง...' : 'บันทึก'}
+                      </button>
+                      <button
+                        onClick={() => { setEditingCredits(false); setEditCreditsValue(''); }}
+                        className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg transition-colors"
+                      >
+                        ยกเลิก
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex-1 bg-purple-800/30 rounded-lg p-3 text-center">
+                        <p className="text-2xl font-bold text-stardust-400">{selectedUser.credits || 0}</p>
+                        <p className="text-purple-300 text-sm">เครดิต</p>
+                      </div>
+                      <button
+                        onClick={() => { setEditingCredits(true); setEditCreditsValue(String(selectedUser.credits || 0)); }}
+                        className="p-2 text-purple-300 hover:text-white hover:bg-purple-700/50 rounded-lg transition-colors"
+                        title="แก้ไขเครดิต"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
               {/* Top Up */}
               <div className="bg-purple-900/30 rounded-xl p-4">
                 <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-stardust-400" />
-                  เติมเครดิต
+                  เติมเครดิตเพิ่ม
                 </h4>
                 <div className="flex gap-3">
                   <input
