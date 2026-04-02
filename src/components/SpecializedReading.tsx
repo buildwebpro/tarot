@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Briefcase, Coins, Activity, Sparkles } from 'lucide-react';
+import { Heart, Briefcase, Coins, Activity, Sparkles, Loader2 } from 'lucide-react';
 import { TarotCard } from './TarotCard';
 import { tarotDeck } from '../data/tarotDeck';
 import { saveReading } from '../utils/history';
 import { v4 as uuidv4 } from 'uuid';
 import type { Card } from '../types/tarot';
+
+const API_URL = import.meta.env.VITE_MINIMAX_API_URL || 'https://api.minimax.io/v1/text/chatcompletion_v2';
+const API_KEY = import.meta.env.VITE_MINIMAX_API_KEY;
 
 // ประเภทการทำนาย
 const readingTypes = [
@@ -47,6 +50,8 @@ export function SpecializedReading() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [isReversed, setIsReversed] = useState<boolean[]>([]);
+  const [aiSummary, setAiSummary] = useState<string>('');
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
 
   const currentType = selectedType ? readingTypes.find(t => t.id === selectedType) : null;
 
@@ -92,11 +97,56 @@ export function SpecializedReading() {
     setSelectedType(null);
     setSelectedCards([]);
     setIsReversed([]);
+    setAiSummary('');
+  };
+
+  const generateAiSummary = async () => {
+    if (!selectedType || selectedCards.length !== 3) return;
+    
+    setIsLoadingSummary(true);
+    try {
+      const typeName = readingTypes.find(t => t.id === selectedType)?.name || '';
+      const cardsList = selectedCards
+        .map((card, i) => `${i + 1}. ${card.name}${isReversed[i] ? ' (กลับหัว)' : ''}`)
+        .join('\n');
+
+      const prompt = `คุณเป็นผู้เชี่ยวชาญการทำนายไพ่ทาโรต์ ให้สรุปคำทำนายจากไพ่ 3 ใบสำหรับด้าน${typeName}:
+
+${cardsList}
+
+กรุณาสรุปคำทำนายเป็นภาษาไทยโดย:
+1. อธิบายสิ่งที่ไพ่ทั้ง 3 ใบบ่งบอกรวมกัน
+2. ให้คำแนะนำที่ชัดเจนและนำไปใช้ได้จริง
+3. เขียนกระชับ 2-3 ย่อหน้า`;
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'MiniMax-M2.7',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 1000
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAiSummary(data.choices?.[0]?.message?.content || '');
+      }
+    } catch (error) {
+      console.error('AI summary error:', error);
+    } finally {
+      setIsLoadingSummary(false);
+    }
   };
 
   useEffect(() => {
     if (currentType && selectedCards.length === currentType.cards) {
       handleComplete();
+      generateAiSummary();
     }
   }, [selectedCards.length, currentType]);
 
@@ -201,6 +251,30 @@ export function SpecializedReading() {
                     เริ่มทำนายใหม่
                   </motion.button>
                 </div>
+
+                {/* AI Summary */}
+                {(isLoadingSummary || aiSummary) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-8 p-6 bg-gradient-to-br from-cosmic-800/50 to-cosmic-900/50 rounded-2xl border border-stardust-500/30"
+                  >
+                    <h5 className="text-xl font-bold text-stardust-300 mb-4 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      สรุปคำทำนายจาก AI
+                    </h5>
+                    {isLoadingSummary ? (
+                      <div className="flex items-center gap-3 text-cosmic-400">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>กำลังสรุปคำทำนาย...</span>
+                      </div>
+                    ) : (
+                      <div className="text-cosmic-200 leading-relaxed whitespace-pre-line">
+                        {aiSummary}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </motion.div>
