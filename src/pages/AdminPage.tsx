@@ -93,8 +93,7 @@ export default function AdminPage() {
 
     setTopUpLoading(true);
     try {
-      const { updateUserCredits } = await import('../services/users');
-      await updateUserCredits(targetUser.uid, newCredits);
+      await usersService.updateUserCredits(targetUser.uid, newCredits);
       await loadData();
       if (selectedUser) {
         const updated = users.find(u => u.uid === targetUser.uid);
