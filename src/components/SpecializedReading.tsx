@@ -261,7 +261,7 @@ ${cardsList}
                   >
                     <h5 className="text-xl font-bold text-stardust-300 mb-4 flex items-center gap-2">
                       <Sparkles className="w-5 h-5" />
-                      สรุปคำทำนายจาก AI
+                      สรุปคำทำนาย
                     </h5>
                     {isLoadingSummary ? (
                       <div className="flex items-center gap-3 text-cosmic-400">
