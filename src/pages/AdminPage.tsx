@@ -574,13 +574,13 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Credits Info with Edit */}
+              {/* Credits Info */}
               <div className="bg-purple-900/30 rounded-xl p-4">
                 <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-stardust-400" />
                   เครดิต
                 </h4>
-                <div className="flex items-center gap-3">
+                <div className="flex gap-3">
                   {editingCredits ? (
                     <>
                       <input
@@ -617,32 +617,24 @@ export default function AdminPage() {
                       >
                         <Edit2 className="w-5 h-5" />
                       </button>
+                      <div className="flex gap-2 ml-2">
+                        <input
+                          type="number"
+                          value={topUpAmount}
+                          onChange={(e) => setTopUpAmount(e.target.value)}
+                          placeholder="+เครดิต"
+                          className="w-24 px-3 py-2 bg-purple-800/50 border border-purple-600/50 rounded-lg text-white placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        />
+                        <button
+                          onClick={() => handleTopUp(selectedUser)}
+                          disabled={topUpLoading || !topUpAmount}
+                          className="px-4 py-2 bg-gradient-to-r from-stardust-500 to-stardust-600 hover:from-stardust-400 hover:to-stardust-500 disabled:from-purple-700 disabled:to-purple-800 disabled:cursor-not-allowed text-deep-950 font-semibold rounded-lg transition-colors"
+                        >
+                          {topUpLoading ? '...' : '+'}
+                        </button>
+                      </div>
                     </>
                   )}
-                </div>
-              </div>
-
-              {/* Top Up */}
-              <div className="bg-purple-900/30 rounded-xl p-4">
-                <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-stardust-400" />
-                  เติมเครดิตเพิ่ม
-                </h4>
-                <div className="flex gap-3">
-                  <input
-                    type="number"
-                    value={topUpAmount}
-                    onChange={(e) => setTopUpAmount(e.target.value)}
-                    placeholder="จำนวนเครดิต"
-                    className="flex-1 px-4 py-2 bg-purple-800/50 border border-purple-600/50 rounded-lg text-white placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
-                  />
-                  <button
-                    onClick={() => handleTopUp(selectedUser)}
-                    disabled={topUpLoading || !topUpAmount}
-                    className="px-6 py-2 bg-gradient-to-r from-stardust-500 to-stardust-600 hover:from-stardust-400 hover:to-stardust-500 disabled:from-purple-700 disabled:to-purple-800 disabled:cursor-not-allowed text-deep-950 font-semibold rounded-lg transition-colors"
-                  >
-                    {topUpLoading ? 'กำลัง...' : 'เติม'}
-                  </button>
                 </div>
               </div>
 
