@@ -1,12 +1,11 @@
-// OpenRouter API utility for AI tarot reading
+// MiniMax API utility for AI tarot reading
 
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const API_URL = import.meta.env.VITE_MINIMAX_API_URL || 'https://api.minimax.io/v1/text/chatcompletion_v2';
+const API_KEY = import.meta.env.VITE_MINIMAX_API_KEY;
 
 export async function generateTarotReading(
   cards: { name: string; position: string; isReversed: boolean }[]
 ): Promise<string> {
-  // สร้าง prompt สำหรับ AI
   const cardsList = cards
     .map((card, i) => `${i + 1}. ${card.position}: ${card.name}${card.isReversed ? ' (กลับหัว)' : ''}`)
     .join('\n');
@@ -18,16 +17,14 @@ ${cardsList}
 กรุณาทำนายโดยอธิบายความหมายของแต่ละไพ่ในตำแหน่งของมัน และให้คำทำนายรวมเป็นภาษาไทย โดยเน้นความสัมพันธ์ การงาน และการเงิน`;
 
   try {
-    const response = await fetch(OPENROUTER_API_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': window.location.href,
-        'X-Title': 'Tarot Reading App'
+        'Authorization': `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat',
+        model: 'MiniMax-M2.7',
         messages: [
           {
             role: 'user',
@@ -39,7 +36,10 @@ ${cardsList}
     });
 
     if (!response.ok) {
-      throw new Error('API request failed');
+      if (response.status === 401) {
+        throw new Error('MiniMax API key is invalid or expired');
+      }
+      throw new Error(`MiniMax API returned ${response.status}`);
     }
 
     const data = await response.json();
