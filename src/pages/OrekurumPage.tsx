@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, RotateCcw, CheckCircle, AlertCircle } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { Sparkles, RotateCcw, CheckCircle, AlertCircle, Pencil } from 'lucide-react';
 
 // 32 คำถามโอเรกุรัม
 const questions = [
@@ -40,7 +39,7 @@ const questions = [
   'ชายที่ฉันรัก เขารักฉันตอบหรือไม่ ?',
 ];
 
-// คำทำนาย 32 แบบสำหรับแต่ละตำแหน่ง (ตัวอย่างคำทำนาย)
+// คำทำนาย 32 แบบ (สำหรับแต่ละตำแหน่ง)
 const predictions = [
   'ผลที่ได้รับจะเป็นไปตามที่คาดหวัง จงมีความหวังและพยายามต่อไป',
   'ควรระมัดระวังในการตัดสินใจ มีโอกาสที่จะเกิดปัญหาได้',
@@ -54,7 +53,7 @@ const predictions = [
   'การเดินทางจะประสบความสำเร็จ',
   'จะมีเรื่องทะเลาะเบาะแว้ง ควรหลีกเลี่ยง',
   'ความสัมพันธ์จะแน่นแฟ้นมากขึ้น',
-  'ควรระมัดระวังคำพูด อาจทำให้เสียความสัมพันธ์',
+  'ควรระวังคำพูด อาจทำให้เสียความสัมพันธ์',
   'จะได้รับโอกาสใหม่ๆ ในชีวิต',
   'ควรตัดสินใจอย่างรอบคอบ มีทางเลือกมาก',
   'จะพบกับคนสำคัญที่จะเปลี่ยนชีวิต',
@@ -76,89 +75,71 @@ const predictions = [
   'เขารักคุณและมองเห็นอนาคตร่วมกัน',
 ];
 
-interface LineData {
-  count: number;
-  isEven: boolean;
-}
-
 export default function OrekurumPage() {
-  const { user } = useAuth();
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
-  const [lines, setLines] = useState<LineData[]>([]);
+  const [currentRow, setCurrentRow] = useState(0);
+  const [rowCounts, setRowCounts] = useState<number[]>([0, 0, 0, 0, 0]);
   const [step, setStep] = useState<'select' | 'draw' | 'result'>('select');
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
-
-  // ขีดเส้น (ไม่นับจำนวน)
-  const handleDrawLine = () => {
-    if (lines.length >= 5) return;
-    
-    // สุ่มจำนวนขีด 3-15 (แบบสุ่มจริงๆ ต้องให้ user คลิกเอง)
-    // ที่นี่ใช้การคลิกเพิ่มขีด
-    setLines([...lines, { count: 0, isEven: false }]);
-  };
+  const [prediction, setPrediction] = useState('');
 
   // เพิ่มขีดในแถวปัจจุบัน
-  const handleClick = () => {
-    if (lines.length === 0 || isDrawing) return;
-    
-    const newLines = [...lines];
-    newLines[newLines.length - 1].count += 1;
-    setLines(newLines);
+  const handleDraw = () => {
+    if (currentRow >= 5) return;
+    const newCounts = [...rowCounts];
+    newCounts[currentRow]++;
+    setRowCounts(newCounts);
   };
 
-  // จบการขีดแถวปัจจุบัน ไปแถวถัดไป
-  const nextLine = () => {
-    if (lines.length === 0 || lines[lines.length - 1].count === 0) return;
-    
-    if (lines.length < 5) {
-      // ไปแถวถัดไป
-      const newLines = [...lines];
-      newLines[newLines.length - 1].isEven = newLines[newLines.length - 1].count % 2 === 0;
-      setLines(newLines);
-    }
+  // ไปแถวถัดไป
+  const handleNextRow = () => {
+    if (currentRow >= 4) return;
+    if (rowCounts[currentRow] === 0) return; // ต้องมีขีดอย่างน้อย 1
+    setCurrentRow(currentRow + 1);
   };
 
-  // ทำนาย
-  const getPrediction = () => {
-    if (lines.length !== 5) return '';
-    
-    // คำนวณรหัสจากจำนวนขีดที่เหลือ (ไม่นับ)
-    const codes = lines.map(line => {
-      const even = line.count % 2 === 0;
-      return even ? '00' : 'X';
-    });
-    
-    // หาคำทำนายจากรหัส
-    const codeIndex = codes.join('') === 'XXXXX' ? 0 : 
-                     codes.join('') === '00000' ? 1 :
-                     parseInt(codes.map(c => c === '00' ? '1' : '0').join(''), 2) % 32;
-    
-    if (!selectedQuestion) return '';
-    
-    return predictions[codeIndex % 32];
+  // ย้อนกลับแถว
+  const handlePrevRow = () => {
+    if (currentRow === 0) return;
+    setCurrentRow(currentRow - 1);
   };
 
+  // เริ่มขีดเส้น
   const handleStartDrawing = () => {
     if (selectedQuestion === null) return;
     setStep('draw');
-    setLines([]);
-    setIsDrawing(true);
-    setShowWarning(true);
+    setCurrentRow(0);
+    setRowCounts([0, 0, 0, 0, 0]);
   };
 
+  // ทำนาย
   const handlePredict = () => {
-    if (lines.length < 5) return;
+    if (rowCounts[4] === 0) return; // ต้องขีดครบ 5 แถว
+    
+    // คำนวณรหัส: คู่ = 00, คี่ = X
+    const codes = rowCounts.map(count => count % 2 === 0 ? '00' : 'X');
+    
+    // แปลงเป็นตัวเลข binary เพื่อหา index
+    const binaryStr = codes.map(c => c === '00' ? '1' : '0').join('');
+    const codeIndex = parseInt(binaryStr, 2) % 32;
+    
+    setPrediction(predictions[codeIndex]);
     setStep('result');
-    setIsDrawing(false);
   };
 
+  // เริ่มใหม่
   const handleReset = () => {
     setSelectedQuestion(null);
-    setLines([]);
+    setCurrentRow(0);
+    setRowCounts([0, 0, 0, 0, 0]);
     setStep('select');
-    setIsDrawing(false);
-    setShowWarning(false);
+    setPrediction('');
+  };
+
+  // ไปแถวก่อนหน้า
+  const goToRow = (row: number) => {
+    if (row >= 0 && row <= currentRow) {
+      setCurrentRow(row);
+    }
   };
 
   return (
@@ -206,7 +187,7 @@ export default function OrekurumPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-stardust-400 font-bold">3.</span>
-                คลิกขีดเส้น 5 แถว โดยไม่นับจำนวน (แถวละกี่ขีดก็ได้)
+                คลิกในช่องขีดเส้น 5 แถว โดยไม่นับจำนวน (แถวละกี่ขีดก็ได้)
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-stardust-400 font-bold">4.</span>
@@ -232,7 +213,7 @@ export default function OrekurumPage() {
                 className="space-y-4"
               >
                 <h2 className="text-2xl font-semibold text-white mb-6">เลือกคำถาม</h2>
-                <div className="grid gap-3">
+                <div className="grid gap-3 max-h-[500px] overflow-y-auto pr-2">
                   {questions.map((q, idx) => (
                     <button
                       key={idx}
@@ -244,7 +225,7 @@ export default function OrekurumPage() {
                       }`}
                     >
                       <span className="text-stardust-400 font-medium mr-2">{idx + 1}.</span>
-                      <span className="text-white">{q}</span>
+                      <span className="text-white text-sm">{q}</span>
                     </button>
                   ))}
                 </div>
@@ -276,74 +257,95 @@ export default function OrekurumPage() {
                   </p>
                 </div>
 
-                {showWarning && (
-                  <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                    <p className="text-blue-200 text-sm">
-                      💡 ขณะขีดเส้น ห้ามนับจำนวนขีด ขีดไปเรื่อยๆ จนพอใจแล้วค่อยไปแถวถัดไป
-                    </p>
-                  </div>
-                )}
+                <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <p className="text-blue-200 text-sm">
+                    💡 คลิกในช่องด้านล่างเพื่อขีดเส้น (ห้ามนับจำนวน ขีดไปเรื่อยๆ จนพอใจ)
+                  </p>
+                </div>
 
-                {/* Drawing Area */}
-                <div className="flex flex-col items-center gap-4">
-                  {/* 5 rows */}
+                {/* Drawing Rows */}
+                <div className="space-y-4">
                   {[0, 1, 2, 3, 4].map((rowIdx) => (
-                    <div key={rowIdx} className="w-full max-w-md">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-cosmic-300 text-sm">แถวที่ {rowIdx + 1}</span>
-                        {lines[rowIdx] && (
-                          <span className={`text-sm ${lines[rowIdx].isEven ? 'text-green-400' : 'text-orange-400'}`}>
-                            {lines[rowIdx].isEven ? '00' : 'X'}
+                    <div key={rowIdx} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <button
+                          onClick={() => goToRow(rowIdx)}
+                          className={`text-sm px-2 py-1 rounded ${
+                            currentRow === rowIdx
+                              ? 'text-purple-400 bg-purple-600/20'
+                              : rowIdx <= currentRow
+                              ? 'text-cosmic-400 hover:text-white'
+                              : 'text-cosmic-600 cursor-not-allowed'
+                          }`}
+                          disabled={rowIdx > currentRow}
+                        >
+                          แถวที่ {rowIdx + 1}
+                        </button>
+                        {rowCounts[rowIdx] > 0 && (
+                          <span className={`text-sm ${rowCounts[rowIdx] % 2 === 0 ? 'text-green-400' : 'text-orange-400'}`}>
+                            {rowCounts[rowIdx] % 2 === 0 ? '00 (คู่)' : 'X (คี่)'}
                           </span>
                         )}
                       </div>
+                      
                       <div 
-                        className="bg-cosmic-900/80 rounded-lg p-4 min-h-[60px] cursor-pointer hover:bg-cosmic-800/80 transition-colors border border-cosmic-700"
+                        className={`bg-cosmic-900/80 rounded-lg p-8 cursor-pointer hover:bg-cosmic-800/80 transition-colors border-2 border-dashed ${
+                          currentRow === rowIdx
+                            ? 'border-purple-500'
+                            : rowIdx < currentRow
+                            ? 'border-cosmic-700'
+                            : 'border-cosmic-800'
+                        }`}
                         onClick={() => {
-                          if (rowIdx === lines.length - 1) {
-                            handleClick();
+                          if (rowIdx === currentRow) {
+                            handleDraw();
                           }
                         }}
                       >
-                        {lines[rowIdx] && (
-                          <div className="flex flex-wrap gap-2 justify-center">
-                            {Array.from({ length: lines[rowIdx].count }).map((_, i) => (
-                              <span key={i} className="text-2xl text-white">|</span>
-                            ))}
-                          </div>
-                        )}
-                        {lines[rowIdx]?.count === 0 && rowIdx < lines.length && (
-                          <p className="text-cosmic-500 text-center">คลิกเพื่อขีด</p>
+                        <div className="flex flex-wrap gap-1 justify-center min-h-[40px]">
+                          {Array.from({ length: rowCounts[rowIdx] }).map((_, i) => (
+                            <span key={i} className="text-3xl text-white font-bold leading-none">|</span>
+                          ))}
+                        </div>
+                        {rowCounts[rowIdx] === 0 && currentRow === rowIdx && (
+                          <p className="text-cosmic-500 text-center mt-2">
+                            <Pencil className="w-5 h-5 inline mr-1" />
+                            คลิกที่นี่เพื่อขีดเส้น
+                          </p>
                         )}
                       </div>
                     </div>
                   ))}
+                </div>
 
-                  {/* Controls */}
-                  <div className="flex gap-4 mt-4">
-                    {lines.length < 5 && (
-                      <button
-                        onClick={() => {
-                          if (lines[lines.length - 1]?.count > 0) {
-                            nextLine();
-                          }
-                        }}
-                        disabled={lines.length === 0 || lines[lines.length - 1]?.count === 0}
-                        className="px-6 py-3 bg-cosmic-700 text-white rounded-lg hover:bg-cosmic-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        แถวถัดไป
-                      </button>
-                    )}
-                    
-                    {lines.length === 5 && lines[4]?.count > 0 && (
-                      <button
-                        onClick={handlePredict}
-                        className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700"
-                      >
-                        ทำนาย
-                      </button>
-                    )}
-                  </div>
+                {/* Controls */}
+                <div className="flex flex-wrap gap-3 justify-center pt-4">
+                  {currentRow > 0 && (
+                    <button
+                      onClick={handlePrevRow}
+                      className="px-4 py-2 bg-cosmic-700 text-white rounded-lg hover:bg-cosmic-600"
+                    >
+                      ← แถวก่อนหน้า
+                    </button>
+                  )}
+                  
+                  {currentRow < 4 && rowCounts[currentRow] > 0 && (
+                    <button
+                      onClick={handleNextRow}
+                      className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    >
+                      แถวถัดไป →
+                    </button>
+                  )}
+                  
+                  {currentRow === 4 && rowCounts[4] > 0 && (
+                    <button
+                      onClick={handlePredict}
+                      className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700"
+                    >
+                      ทำนาย
+                    </button>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -367,7 +369,12 @@ export default function OrekurumPage() {
                   
                   <div className="bg-purple-900/30 rounded-xl p-6 mb-6">
                     <h4 className="text-lg font-semibold text-stardust-300 mb-3">คำทำนาย:</h4>
-                    <p className="text-white text-lg whitespace-pre-line">{getPrediction()}</p>
+                    <p className="text-white text-lg">{prediction}</p>
+                  </div>
+
+                  {/* แสดงรหัส */}
+                  <div className="text-sm text-cosmic-400 mb-6">
+                    รหัส: {rowCounts.map(c => c % 2 === 0 ? '00' : 'X').join(' ')}
                   </div>
                   
                   <button
