@@ -1,7 +1,7 @@
-// MiniMax API utility for AI tarot reading
+// Groq API utility for AI tarot reading
 
-const API_URL = import.meta.env.VITE_MINIMAX_API_URL || 'https://api.minimax.io/v1/text/chatcompletion_v2';
-const API_KEY = import.meta.env.VITE_MINIMAX_API_KEY;
+const API_URL = import.meta.env.VITE_GROQ_API_URL || 'https://api.groq.com/openai/v1';
+const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 export async function generateTarotReading(
   cards: { name: string; position: string; isReversed: boolean }[]
@@ -24,7 +24,7 @@ ${cardsList}
         'Authorization': `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'MiniMax-M2.7',
+        model: 'llama-3.1-8b-instant',
         messages: [
           {
             role: 'user',
@@ -37,9 +37,9 @@ ${cardsList}
 
     if (!response.ok) {
       if (response.status === 401) {
-        throw new Error('MiniMax API key is invalid or expired');
+        throw new Error('Groq API key is invalid or expired');
       }
-      throw new Error(`MiniMax API returned ${response.status}`);
+      throw new Error(`Groq API returned ${response.status}`);
     }
 
     const data = await response.json();
