@@ -1,7 +1,7 @@
-// OpenRouter API utility for AI horoscope reading
+// MiniMax API utility for AI horoscope reading
 
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const API_URL = import.meta.env.VITE_MINIMAX_API_URL || 'https://api.minimax.io/v1/text/chatcompletion_v2';
+const API_KEY = import.meta.env.VITE_MINIMAX_API_KEY;
 
 export async function generateHoroscopeReading(sign: string, thaiName: string, element: string): Promise<string> {
   const prompt = `คุณเป็นผู้เชี่ยวชาญด้านโหราศาสตร์ จงทำนายดวงชะตาประจำวันสำหรับราศี ${thaiName} (${sign}) ธาตุ${element} โดยให้คำทำนายในหัวข้อต่อไปนี้เป็นภาษาไทย:
@@ -15,16 +15,14 @@ export async function generateHoroscopeReading(sign: string, thaiName: string, e
 ให้คำทำนายที่สนุก น่าสนใจ และให้กำลังใจ ห้ามใส่วันที่หรือข้อความใดๆ ที่เป็นตัวยึดเวลา (เช่น วันที่ วันนี้ แล้วแต่วัน) ให้เขียนเสมือนเป็นคำทำนายทั่วไปที่ไม่ต้องระบุวันที่`;
 
   try {
-    const response = await fetch(OPENROUTER_API_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': window.location.href,
-        'X-Title': 'Tarot Reading App'
+        'Authorization': `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat',
+        model: 'MiniMax-M2.7',
         messages: [
           {
             role: 'user',
@@ -36,7 +34,10 @@ export async function generateHoroscopeReading(sign: string, thaiName: string, e
     });
 
     if (!response.ok) {
-      throw new Error('API request failed');
+      if (response.status === 401) {
+        throw new Error('MiniMax API key is invalid or expired');
+      }
+      throw new Error(`MiniMax API returned ${response.status}`);
     }
 
     const data = await response.json();
