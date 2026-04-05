@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, RotateCcw, CheckCircle, AlertCircle, Pencil } from 'lucide-react';
+import { Sparkles, RotateCcw, CheckCircle, AlertCircle, Pencil, Loader2 } from 'lucide-react';
+
+// Groq API
+const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL || 'https://api.groq.com/openai/v1';
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 // 32 คำถามโอเรกุรัม
 const questions = [
@@ -81,6 +85,7 @@ export default function OrekurumPage() {
   const [rowCounts, setRowCounts] = useState<number[]>([0, 0, 0, 0, 0]);
   const [step, setStep] = useState<'select' | 'draw' | 'result'>('select');
   const [prediction, setPrediction] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // เพิ่มขีดในแถวปัจจุบัน
   const handleDraw = () => {
@@ -111,8 +116,8 @@ export default function OrekurumPage() {
     setRowCounts([0, 0, 0, 0, 0]);
   };
 
-  // ทำนาย
-  const handlePredict = () => {
+  // ทำนาย - ใช้ AI ก่อน ถ้าไม่ได้ใช้ fallback
+  const handlePredict = async () => {
     if (rowCounts[4] === 0) return; // ต้องขีดครบ 5 แถว
     
     // คำนวณรหัส: คู่ = 00, คี่ = X
@@ -122,6 +127,50 @@ export default function OrekurumPage() {
     const binaryStr = codes.map(c => c === '00' ? '1' : '0').join('');
     const codeIndex = parseInt(binaryStr, 2) % 32;
     
+    // ถ้ามี Groq API key ใช้ AI
+    if (GROQ_API_KEY) {
+      setIsLoading(true);
+      try {
+        const questionText = questions[selectedQuestion || 0];
+        const codePattern = codes.join(' ');
+        
+        const prompt = `คุณเป็นผู้เชี่ยวชาญการทำนายโอเรกุรัม จงทำนายสำหรับคำถามนี้:
+
+คำถาม: ${questionText}
+รหัสที่ได้: ${codePattern}
+
+กรุณาทำนายเป็นภาษาไทย สั้นๆ ได้ใจความ (2-3 บรรทัด)`;
+
+        const response = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 500
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const aiPrediction = data.choices?.[0]?.message?.content;
+          if (aiPrediction) {
+            setPrediction(aiPrediction);
+            setStep('result');
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('AI prediction error:', error);
+      }
+      setIsLoading(false);
+    }
+    
+    // Fallback: ใช้คำทำนายคงที่
     setPrediction(predictions[codeIndex]);
     setStep('result');
   };
@@ -341,9 +390,17 @@ export default function OrekurumPage() {
                   {currentRow === 4 && rowCounts[4] > 0 && (
                     <button
                       onClick={handlePredict}
-                      className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700"
+                      disabled={isLoading}
+                      className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                      ทำนาย
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          กำลังทำนาย...
+                        </>
+                      ) : (
+                        'ทำนาย'
+                      )}
                     </button>
                   )}
                 </div>
