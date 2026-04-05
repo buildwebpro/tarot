@@ -106,7 +106,7 @@ export function Header() {
               <button
                 onClick={() => setOpenDropdown(openDropdown === 'horoscope' ? null : 'horoscope')}
                 className={`flex items-center gap-1 text-sm font-medium transition-all duration-300 ${
-                  openDropdown === 'horoscope' || isActive('/horoscope') || isActive('/uranian')
+                  openDropdown === 'horoscope' || isActive('/horoscope') || isActive('/uranian') || isActive('/orekurum')
                     ? 'text-stardust-400 text-glow-soft'
                     : 'text-cosmic-200 hover:text-stardust-300'
                 }`}
@@ -131,6 +131,10 @@ export function Header() {
                       <Link to="/uranian" className="block px-4 py-2.5 hover:bg-cosmic-800/50 transition-colors" onClick={() => setOpenDropdown(null)}>
                         <p className="text-sm font-medium text-white">โหราศาสตร์ยูเรเนียน</p>
                         <p className="text-xs text-cosmic-300 mt-0.5">ระบบโหราศาสตร์ขั้นสูง</p>
+                      </Link>
+                      <Link to="/orekurum" className="block px-4 py-2.5 hover:bg-cosmic-800/50 transition-colors" onClick={() => setOpenDropdown(null)}>
+                        <p className="text-sm font-medium text-white">โอเรกุรัม</p>
+                        <p className="text-xs text-cosmic-300 mt-0.5">ศาสตร์การทำนายแบบยิปซี</p>
                       </Link>
                     </div>
                   </motion.div>

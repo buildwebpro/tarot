@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Star, Grid3X3, Layers, Globe } from 'lucide-react';
+import { ArrowRight, Sparkles, Star, Grid3X3, Layers, Globe, BookOpen } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 
 const ArticleList = lazy(() => import('../components/ArticleList'));
@@ -42,6 +42,13 @@ export default function HomePage() {
       icon: <Globe className="w-6 h-6" />,
       link: '/uranian',
       tag: 'ขั้นสูง',
+    },
+    {
+      title: 'โอเรกุรัม',
+      desc: 'ศาสตร์การทำนายแบบยิปซี ตอบคำถามได้ 32 ข้อ',
+      icon: <BookOpen className="w-6 h-6" />,
+      link: '/orekurum',
+      tag: '32 คำถาม',
     },
   ];
 

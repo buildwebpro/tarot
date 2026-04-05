@@ -16,6 +16,7 @@ const ProfilePage      = lazy(() => import('./pages/ProfilePage'));
 const LoginPage        = lazy(() => import('./pages/LoginPage'));
 const AdminPage        = lazy(() => import('./pages/AdminPage'));
 const PricingPage      = lazy(() => import('./pages/PricingPage'));
+const OrekurumPage      = lazy(() => import('./pages/OrekurumPage'));
 
 function PageLoader() {
   return (
@@ -78,6 +79,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/orekurum" element={<OrekurumPage />} />
             </Routes>
           </Suspense>
         </main>
