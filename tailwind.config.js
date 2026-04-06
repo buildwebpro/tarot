@@ -44,7 +44,13 @@ export default {
         deep: {
           950: '#0c0618',
           980: '#07030f',
-        }
+        },
+        // Hero Section Colors
+        background: '#07030f',
+        foreground: '#e3dbf3',
+        primary: '#fde047',
+        'primary-foreground': '#07030f',
+        'muted-foreground': '#a78bd8',
       },
       fontFamily: {
         sans: ['Inter', 'Noto Sans Thai', 'system-ui', 'sans-serif'],

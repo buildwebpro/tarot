@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, Star, Grid3X3, Layers, Globe, BookOpen } from 'lu
 import { lazy, Suspense } from 'react';
 
 const ArticleList = lazy(() => import('../components/ArticleList'));
+const HeroSection = lazy(() => import('../components/HeroSection'));
 
 export default function HomePage() {
   const services = [
@@ -59,74 +60,10 @@ export default function HomePage() {
         <meta name="description" content="บริการดูดวงออนไลน์ ไพ่ทาโรต์ ไพ่เสี่ยงทาย Celtic Cross ดูดวงรายวันตามราศี โหราศาสตร์ยูเรเนียน ทำนายดวงชะตาแม่นยำ 20ปี ประสบการณ์" />
       </Helmet>
 
-      {/* ═══ HERO — Dark Section (Cosmic Style) ═══ */}
-      <section className="relative text-white overflow-hidden min-h-[90vh] flex items-center">
-        {/* Background cosmic elements */}
-        <div className="absolute inset-0 bg-gradient-to-b from-cosmic-950/40 via-transparent to-cosmic-980/90 pointer-events-none" />
-
-        {/* Starfield background (optimized) */}
-        <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay shadow-inner" />
-
-        {/* Zodiac constellation symbols - subtle decorative */}
-        <div className="absolute inset-0 pointer-events-none opacity-15">
-          {/* Aries symbol top left */}
-          <div className="absolute top-[15%] left-[10%] text-6xl font-light text-stardust-400" style={{ transform: 'rotate(-15deg)' }}>♈</div>
-          {/* Taurus symbol */}
-          <div className="absolute top-[25%] right-[15%] text-5xl font-light text-stardust-300" style={{ transform: 'rotate(10deg)' }}>♉</div>
-          {/* Cancer symbol */}
-          <div className="absolute top-[40%] left-[5%] text-5xl font-light text-stardust-400" style={{ transform: 'rotate(-5deg)' }}>♋</div>
-          {/* Leo symbol */}
-          <div className="absolute top-[35%] right-[8%] text-6xl font-light text-stardust-300" style={{ transform: 'rotate(15deg)' }}>♌</div>
-          {/* Libra symbol */}
-          <div className="absolute bottom-[35%] left-[12%] text-5xl font-light text-stardust-400" style={{ transform: 'rotate(-10deg)' }}>♎</div>
-          {/* Scorpio symbol */}
-          <div className="absolute bottom-[30%] right-[10%] text-5xl font-light text-stardust-300" style={{ transform: 'rotate(8deg)' }}>♏</div>
-          {/* Sagittarius symbol */}
-          <div className="absolute bottom-[45%] left-[20%] text-6xl font-light text-stardust-400" style={{ transform: '-5deg' }}>♐</div>
-          {/* Pisces symbol */}
-          <div className="absolute bottom-[50%] right-[20%] text-5xl font-light text-stardust-300" style={{ transform: 'rotate(12deg)' }}>♓</div>
-        </div>
-
-        {/* Purple nebula glow */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(139,92,246,0.12) 0%, transparent 60%)' }} />
-
-        {/* Gold glow accent */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 80% 70%, rgba(234,179,8,0.08) 0%, transparent 40%)' }} />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="max-w-3xl relative z-10"
-          >
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-display font-bold leading-loose tracking-tight mb-6 drop-shadow-lg">
-              ดูดวงออนไลน์
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-stardust-300 via-stardust-400 to-stardust-500 text-glow">20ปี ประสบการณ์</span>
-            </h1>
-            <p className="text-lg text-cosmic-200 leading-relaxed max-w-xl mb-10 text-shadow">
-              บริการดูดวงไพ่ทาโรต์ ดูดวงรายวันตามราศี และโหราศาสตร์ยูเรเนียน
-              ทำนายชะตาชีวิตด้วยประสบการณ์ 20 ปี ที่ผสมผสานองค์ความรู้โหราศาสตร์โบราณ ท่ามกลางหมู่ดาว
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                to="/tarot"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-stardust-500 to-stardust-600 hover:from-stardust-400 hover:to-stardust-500 text-deep-950 font-semibold rounded-full shadow-lg shadow-stardust-500/30 border border-stardust-400/30 transition-all hover:scale-105 active:scale-95 text-sm uppercase tracking-wide"
-              >
-                เปิดไพ่ทาโรต์
-                <Sparkles className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/horoscope"
-                className="inline-flex items-center gap-2 px-8 py-4 glass-card hover:bg-cosmic-800/80 hover:border-stardust-500/30 text-cosmic-100 hover:text-stardust-300 font-medium rounded-full transition-all text-sm uppercase tracking-wide"
-              >
-                ดูดวงรายวัน
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* ═══ HERO — New Hero Section ═══ */}
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+        <HeroSection />
+      </Suspense>
 
       {/* ═══ SERVICES — Glass Section ═══ */}
       <section className="relative py-20 lg:py-32 z-10">
