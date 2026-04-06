@@ -1,7 +1,7 @@
-// Groq API utility for AI horoscope reading
+// DeepSeek API utility for AI horoscope reading
 
-const API_URL = import.meta.env.VITE_GROQ_API_URL || 'https://api.groq.com/openai/v1';
-const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const API_URL = import.meta.env.VITE_DEEPSEEK_API_URL || 'https://api.deepseek.com/v1/chat/completions';
+const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY;
 
 export async function generateHoroscopeReading(sign: string, thaiName: string, element: string): Promise<string> {
   const prompt = `คุณเป็นผู้เชี่ยวชาญด้านโหราศาสตร์ จงทำนายดวงชะตาประจำวันสำหรับราศี ${thaiName} (${sign}) ธาตุ${element} โดยให้คำทำนายในหัวข้อต่อไปนี้เป็นภาษาไทย:
@@ -12,7 +12,7 @@ export async function generateHoroscopeReading(sign: string, thaiName: string, e
 4. ด้านสุขภาพ
 5. สีมงคล เลขนำโชค และเวลามงคล
 
-ให้คำทำนายที่สนุก น่าสนใจ และให้กำลังใจ ห้ามใส่วันที่หรือข้อความใดๆ ที่เป็นตัวยึดเวลา (เช่น วันที่ วันนี้ แล้วแต่วัน) ให้เขียนเสมือนเป็นคำทำนายทั่วไปที่ไม่ต้องระบุวันที่`;
+ให้คำทำนายที่สนุก น่าสนใจ และให้กำลังใจ ห้ามใส่วันที่หรือข้อความใดๆ ที่เป็นตัวยึดเวลา (เช่น วันที่ วันนี้ แล้วแต่วัน) ให้เขีย��เสมือนเป็นคำทำนายทั่วไปที่ไม่ต้องระบุวันที่`;
 
   try {
     const response = await fetch(API_URL, {
@@ -22,7 +22,7 @@ export async function generateHoroscopeReading(sign: string, thaiName: string, e
         'Authorization': `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'deepseek-chat',
         messages: [
           {
             role: 'user',
@@ -35,9 +35,9 @@ export async function generateHoroscopeReading(sign: string, thaiName: string, e
 
     if (!response.ok) {
       if (response.status === 401) {
-        throw new Error('Groq API key is invalid or expired');
+        throw new Error('DeepSeek API key is invalid or expired');
       }
-      throw new Error(`Groq API returned ${response.status}`);
+      throw new Error(`DeepSeek API returned ${response.status}`);
     }
 
     const data = await response.json();
