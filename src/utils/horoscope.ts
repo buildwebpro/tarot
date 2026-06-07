@@ -1,7 +1,7 @@
 import { dailyPredictions } from '../data/horoscope/dailyPredictions';
 import { zodiacSigns } from '../data/zodiac';
 import { saveReading, saveReadingToFirestore } from './history';
-import { generateHoroscopeReading } from './aiHoroscope';
+import { generateHoroscopeReading } from './ai'; // ใช้ centralized AI (ผ่าน secure proxy)
 import { v4 as uuidv4 } from 'uuid';
 
 export async function getDailyHoroscope(sign: string, userId?: string): Promise<string> {

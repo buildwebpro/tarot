@@ -4,7 +4,7 @@ import { Sparkles, Star, Layers, Grid3X3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TarotCard } from '../components/TarotCard';
 import { tarotDeck } from '../data/tarotDeck';
-import { getTarotReading } from '../utils/openai';
+import { getTarotReading } from '../utils/openai'; // local static interpretation (ไม่ใช่ OpenAI)
 import type { Card } from '../types/tarot';
 import { saveReading, saveReadingToFirestore } from '../utils/history';
 import { v4 as uuidv4 } from 'uuid';

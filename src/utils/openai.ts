@@ -1,3 +1,11 @@
+/**
+ * Local (rule-based) Tarot interpretation.
+ * This file does NOT call any LLM / OpenAI.
+ * It builds a reading from local tarotMeanings data only.
+ *
+ * @deprecated filename - consider renaming to localTarot.ts in future cleanup.
+ */
+
 import type { Card } from '../types/tarot';
 import { tarotMeanings } from '../data/tarotMeanings';
 

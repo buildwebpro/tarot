@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, RotateCcw, CheckCircle, AlertCircle, Pencil, Loader2 } from 'lucide-react';
-
-// Groq API
-const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL || 'https://api.groq.com/openai/v1';
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+import { generateOrekurumPrediction } from '../utils/ai';
 
 // 32 คำถามโอเรกุรัม
 const questions = [
@@ -116,60 +113,35 @@ export default function OrekurumPage() {
     setRowCounts([0, 0, 0, 0, 0]);
   };
 
-  // ทำนาย - ใช้ AI ก่อน ถ้าไม่ได้ใช้ fallback
+  // ทำนาย - ใช้ AI (ผ่าน centralized service) ก่อน แล้วค่อย fallback
   const handlePredict = async () => {
     if (rowCounts[4] === 0) return; // ต้องขีดครบ 5 แถว
-    
+
     // คำนวณรหัส: คู่ = 00, คี่ = X
     const codes = rowCounts.map(count => count % 2 === 0 ? '00' : 'X');
-    
-    // แปลงเป็นตัวเลข binary เพื่อหา index
+    const codePattern = codes.join(' ');
+
+    // แปลงเป็นตัวเลข binary เพื่อหา index (สำหรับ fallback)
     const binaryStr = codes.map(c => c === '00' ? '1' : '0').join('');
     const codeIndex = parseInt(binaryStr, 2) % 32;
-    
-    // ถ้ามี Groq API key ใช้ AI
-    if (GROQ_API_KEY) {
-      setIsLoading(true);
-      try {
-        const questionText = questions[selectedQuestion || 0];
-        const codePattern = codes.join(' ');
-        
-        const prompt = `คุณเป็นผู้เชี่ยวชาญการทำนายโอเรกุรัม จงทำนายสำหรับคำถามนี้:
 
-คำถาม: ${questionText}
-รหัสที่ได้: ${codePattern}
+    const questionText = questions[selectedQuestion || 0];
 
-กรุณาทำนายเป็นภาษาไทย สั้นๆ ได้ใจความ (2-3 บรรทัด)`;
-
-        const response = await fetch(GROQ_API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${GROQ_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: 'llama-3.1-8b-instant',
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 500
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const aiPrediction = data.choices?.[0]?.message?.content;
-          if (aiPrediction) {
-            setPrediction(aiPrediction);
-            setStep('result');
-            setIsLoading(false);
-            return;
-          }
-        }
-      } catch (error) {
-        console.error('AI prediction error:', error);
+    setIsLoading(true);
+    try {
+      // เรียกผ่าน centralized AI service (เตรียมพร้อมสำหรับย้ายไป proxy ในอนาคต)
+      const aiPrediction = await generateOrekurumPrediction(questionText, codePattern);
+      if (aiPrediction && !aiPrediction.includes('ข้อผิดพลาด')) {
+        setPrediction(aiPrediction);
+        setStep('result');
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Orekurum AI error:', error);
     }
-    
+    setIsLoading(false);
+
     // Fallback: ใช้คำทำนายคงที่
     setPrediction(predictions[codeIndex]);
     setStep('result');

@@ -7,9 +7,7 @@ import { saveReading, saveReadingToFirestore } from '../utils/history';
 import { v4 as uuidv4 } from 'uuid';
 import type { Card } from '../types/tarot';
 import { useAuth } from '../contexts/AuthContext';
-
-const API_URL = import.meta.env.VITE_MINIMAX_API_URL || 'https://api.minimax.io/v1/text/chatcompletion_v2';
-const API_KEY = import.meta.env.VITE_MINIMAX_API_KEY;
+import { generateSpecializedReading } from '../utils/ai';
 
 // ประเภทการทำนาย
 const readingTypes = [
@@ -110,42 +108,20 @@ export function SpecializedReading() {
 
   const generateAiSummary = async () => {
     if (!selectedType || selectedCards.length !== 3) return;
-    
+
+    const typeName = readingTypes.find(t => t.id === selectedType)?.name || '';
+    const cardsList = selectedCards
+      .map((card, i) => `${i + 1}. ${card.name}${isReversed[i] ? ' (กลับหัว)' : ''}`)
+      .join('\n');
+
     setIsLoadingSummary(true);
     try {
-      const typeName = readingTypes.find(t => t.id === selectedType)?.name || '';
-      const cardsList = selectedCards
-        .map((card, i) => `${i + 1}. ${card.name}${isReversed[i] ? ' (กลับหัว)' : ''}`)
-        .join('\n');
-
-      const prompt = `คุณเป็นผู้เชี่ยวชาญการทำนายไพ่ทาโรต์ ให้สรุปคำทำนายจากไพ่ 3 ใบสำหรับด้าน${typeName}:
-
-${cardsList}
-
-กรุณาสรุปคำทำนายเป็นภาษาไทยโดย:
-1. อธิบายสิ่งที่ไพ่ทั้ง 3 ใบบ่งบอกรวมกัน
-2. ให้คำแนะนำที่ชัดเจนและนำไปใช้ได้จริง
-3. เขียนกระชับ 2-3 ย่อหน้า`;
-
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'MiniMax-M2.7',
-          messages: [{ role: 'user', content: prompt }],
-          max_tokens: 1000
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setAiSummary(data.choices?.[0]?.message?.content || '');
-      }
+      // เรียกผ่าน centralized service
+      const summary = await generateSpecializedReading(typeName, cardsList);
+      setAiSummary(summary || '');
     } catch (error) {
-      console.error('AI summary error:', error);
+      console.error('Specialized AI error:', error);
+      setAiSummary('');
     } finally {
       setIsLoadingSummary(false);
     }

@@ -1,3 +1,5 @@
+import { generateUranianReading } from './ai';
+
 interface UranianData {
   birthDate: string;
   birthTime: string;
@@ -229,103 +231,11 @@ ${chartDataStr}
 - ใช้ emoji เพื่อความสวยงามและเข้าใจง่าย`;
 
   try {
-    const apiUrl = import.meta.env.VITE_MINIMAX_API_URL || 'https://api.minimax.io/v1/text/chatcompletion_v2';
-    const apiKey = import.meta.env.VITE_MINIMAX_API_KEY;
-    
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'MiniMax-M2.7',
-        messages: [
-          {
-            role: 'system',
-            content: `คุณเป็นโหรผู้เชี่ยวชาญด้านโหราศาสตร์ยูเรเนียน (Uranian Astrology) ที่มีความเชี่ยวชาญสูง
-
-ให้คุณวิเคราะห์ดวงชะตาอย่างละเอียดและครบถ้วน โดยอิงจากข้อมูลดาวที่ได้รับมา:
-
-【1. จุดสำคัญ 6 จุด (Six Points Identity)】
-วิเคราะห์ MC, ASC, Sun, Moon, North Node, Vertex ว่าอยู่ราศีอะไร และส่งผลต่อชีวิตด้านใด
-
-【2. ดาวเคราะห์ในราศีและเรือน】
-วิเคราะห์ดาวแต่ละดวงว่าอยู่ราศีอะไร เรือนอะไร เจ้าเรือนคือดาวอะไร มีพลังอย่างไร
-
-【3. มุมสัมพันธ์ (Aspects)】
-วิเคราะห์มุมสัมพันธ์ระหว่างดาว เช่น conjunction, opposition, square, trine, sextile ส่งผลอย่างไร
-
-【4. จุดศูนย์รังสี (Midpoints)】
-วิเคราะห์จุดศูนย์รังสีที่มีดาวสัมผัส บ่งบอกถึงพลังพิเศษด้านใด
-
-【5. ภาพดาว (Planetary Pictures)】
-วิเคราะห์ภาพดาวที่เกิดขึ้น แสดงถึงพลังงานเฉพาะทางอะไร
-
-【6. เรือนชะตา (Houses)】
-วิเคราะห์เรือนแต่ละเรือนว่ามีดาวอะไรสถิต ส่งผลต่อด้านชีวิตอะไร
-
-【7. การวิเคราะห์ด้านต่างๆ】
-- ลักษณะนิสัย บุคลิกภาพ
-- ความรัก ความสัมพันธ์
-- การงาน อาชีพ
-- การเงิน ทรัพย์สิน
-- สุขภาพ
-- การเติบโตทางจิตวิญญาณ
-
-【8. สรุปคำแนะนำสำคัญ】⚠️ ส่วนนี้สำคัญมาก ต้องเขียนให้ชัดเจน กระชับ และนำไปใช้ได้จริง:
-- 🎯 **สิ่งที่สำคัญที่สุด**: สิ่งที่เจ้าชะตาควรให้ความสำคัญในชีวิต
-- ⚡ **สิ่งที่ต้องระวัง**: อุปสรรค ความเสี่ยง หรือจุดอ่อนที่ต้องระวัง
-- 🔥 **สิ่งที่ควรโฟกัส**: โอกาส จุดแข็ง หรือทิศทางที่ควรมุ่งเน้น
-
-【รูปแบบการตอบ】
-- ใช้ภาษาไทย
-- เขียนให้ครบถ้วน ละเอียด เจาะลึก
-- อ้างอิงข้อมูลดาวที่ได้รับก่อนแปลความหมาย
-- ใช้ emoji ประกอบให้สวยงาม
-- แบ่งเป็นหัวข้อชัดเจน
-- สรุปปิดท้ายด้วยส่วน【สรุปคำแนะนำสำคัญ】ที่ชัดเจน กระชับ`
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 8000,
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        throw new UranianError(
-          'MiniMax API key is invalid or expired',
-          'MINIMAX_API_KEY',
-          false
-        );
-      }
-      throw new UranianError(
-        `MiniMax API returned ${response.status}`,
-        'MINIMAX_API_FAILED',
-        true
-      );
-    }
-
-    const resData = await response.json();
-    return resData.choices[0].message.content || 'ขออภัย ไม่สามารถทำนายได้ในขณะนี้';
+    // เรียกผ่าน centralized proxy (Firebase Cloud Function) เพื่อไม่ให้ API key หลุดไป client
+    return await generateUranianReading(prompt);
   } catch (error) {
-    if (error instanceof UranianError) {
-      console.error('Uranian API error:', error.message);
-      const errorInfo = ERROR_MESSAGES[error.code];
-      if (errorInfo) {
-        throw new Error(errorInfo.th);
-      }
-      throw new Error(error.message);
-    } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      console.error('MiniMax network error:', error);
-      throw new Error(ERROR_MESSAGES.MINIMAX_NETWORK.th);
-    }
-    console.error('Error getting Uranian reading:', error);
-    throw new Error('เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง');
+    console.error('Uranian AI error (via secure proxy):', error);
+    // ใช้ข้อความ error ทั่วไปเพื่อไม่ให้ leak ข้อมูล
+    throw new Error('เกิดข้อผิดพลาดในการทำนายยูเรเนียน กรุณาลองใหม่ภายหลัง');
   }
 }

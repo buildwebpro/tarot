@@ -4,7 +4,7 @@ import { RotateCcw, Sparkles, Loader2 } from 'lucide-react';
 import { tarotDeck } from '../data/tarotDeck';
 import { TarotCard } from './TarotCard';
 import { saveReading, saveReadingToFirestore } from '../utils/history';
-import { generateTarotReading } from '../utils/openrouter';
+import { generateTarotReading } from '../utils/ai';
 import { v4 as uuidv4 } from 'uuid';
 import type { Card } from '../types/tarot';
 import { useAuth } from '../contexts/AuthContext';
