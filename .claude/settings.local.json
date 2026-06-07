@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npx update-browserslist-db@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(sed:*)",
+      "WebSearch",
+      "WebFetch(domain:www.biddytarot.com)",
+      "WebFetch(domain:www.tarot.com)",
+      "WebFetch(domain:www.learntarot.com)",
+      "WebFetch(domain:www.keen.com)",
+      "WebFetch(domain:www.thetarotguide.com)",
+      "WebFetch(domain:www.astrology.com)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(firebase deploy:*)",
+      "Bash(firebase firestore:rules:get:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm:*)",
+      "WebFetch(domain:fonts.google.com)",
+      "Bash(curl -s \"https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/2/svg/2651.svg\" -o /tmp/capricorn_test.svg)",
+      "Read(//tmp/**)"
+    ]
+  }
+}
