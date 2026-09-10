@@ -12,7 +12,7 @@ run_worker_first = ["/api/*", "/line/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "duduang"
-database_id = "REPLACE_WITH_D1_ID"
+database_id = "ed92fd3c-660b-4c80-a171-09e08e3bc1b3"
 
 [triggers]
 crons = ["0 22 * * *"]   # 22:00 UTC = 05:00 ไทย ส่งดวงรายวันทาง LINE
