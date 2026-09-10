@@ -5,11 +5,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api/astrology': {
-        target: 'https://astrology.buildweb.pro',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/astrology/, ''),
-      },
+      // dev: รัน `npm run worker:dev` (wrangler dev :8787) คู่กับ vite
+      '/api': { target: 'http://127.0.0.1:8787', changeOrigin: true },
     },
   },
   build: {

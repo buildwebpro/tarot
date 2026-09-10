@@ -80,9 +80,9 @@ export async function getUranianReading(data: UranianData): Promise<string> {
   let chartDataStr = "";
   let chartApiError: UranianError | null = null;
   try {
-    const isDev = import.meta.env.DEV;
-    const apiBase = isDev ? '/api/astrology' : (import.meta.env.VITE_ASTROLOGY_API_URL || 'https://astrology.buildweb.pro');
-    const chartRes = await fetch(`${apiBase}/chart?date=${data.birthDate}&time=${data.birthTime}&lat=${lat}&lon=${lon}&tz=7`);
+    // Swiss Ephemeris รันบน Cloudflare Worker เดียวกับเว็บ (same-origin)
+    const apiBase = import.meta.env.VITE_API_BASE || '';
+    const chartRes = await fetch(`${apiBase}/api/chart?date=${data.birthDate}&time=${data.birthTime}&lat=${lat}&lon=${lon}&tz=7`);
     if (chartRes.ok) {
       const chartJson = await chartRes.json();
       

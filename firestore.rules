@@ -24,16 +24,18 @@ service cloud.firestore {
       allow write: if isOwner(userId) || isAdmin();
     }
 
-    // ประวัติการทำนาย - อ่านได้ทุกคนที่ล็อกอิน, เขียนได้เฉพาะเจ้าของ
+    // ประวัติการทำนาย (Readings/History)
+    // - อ่านได้เฉพาะเจ้าของหรือ admin (แก้ปัญหา: ทุกคนที่ล็อกอินอ่านได้หมด)
+    // - สร้างได้เฉพาะเมื่อ userId ในเอกสารตรงกับผู้ที่ล็อกอิน
+    // - แก้ไข/ลบได้เฉพาะเจ้าของหรือ admin
     match /history/{readingId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if isOwner(resource.data.userId);
+      allow read: if request.auth != null && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && (isOwner(resource.data.userId) || isAdmin());
     }
 
-    // อนุญาตให้อ่านได้ทั้งหมด
-    match /{document=**} {
-      allow read: if true;
-    }
+    // ลบกฎ catch-all อันตรายที่อนุญาตให้อ่านทุกอย่าง
+    // หากต้องการอนุญาตเพิ่มในอนาคต ให้ประกาศ collection ให้ชัดเจน
+    // match /{document=**} { allow read: if false; }
   }
 }

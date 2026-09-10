@@ -1,0 +1,25 @@
+name = "duduang-online"
+main = "worker/index.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# หน้าเว็บ (vite build -> dist) เสิร์ฟจาก Worker ตัวเดียวกัน
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/line/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "duduang"
+database_id = "REPLACE_WITH_D1_ID"
+
+[triggers]
+crons = ["0 22 * * *"]   # 22:00 UTC = 05:00 ไทย ส่งดวงรายวันทาง LINE
+
+[vars]
+FIREBASE_PROJECT_ID = "rujskiddao-tarot"
+PERSONA = "หมอดูสายอบอุ่น ใช้ภาษาพูด กระชับ ตรงไปตรงมา จบด้วยคำแนะนำที่ทำได้จริง 1 ข้อ"
+
+# Secrets (ตั้งใน Dashboard > Worker > Settings > Variables and Secrets):
+#   DEEPSEEK_API_KEY, GROQ_API_KEY, MINIMAX_API_KEY, LINE_TOKEN, LINE_SECRET

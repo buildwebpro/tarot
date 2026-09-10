@@ -1,13 +1,9 @@
 // Centralized AI / LLM Service
-// SECURITY: All LLM calls now go through Firebase Cloud Functions (generateAI)
-// so that real API keys never reach the client bundle.
+// SECURITY: ทุกการเรียก LLM ผ่าน Cloudflare Worker (/api/ai) — API key ไม่อยู่ใน client bundle
 
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app } from '../config/firebase'; // reuse existing initialized app
+import { auth } from '../config/firebase';
 
-const functions = getFunctions(app);
-// Region ควรตรงกับที่ deploy functions (ค่าเริ่มต้น us-central1 หรือ asia-southeast1)
-const generateAICallable = httpsCallable(functions, 'generateAI');
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 async function callLLMProxy(
   provider: 'groq' | 'deepseek' | 'minimax',
@@ -16,16 +12,18 @@ async function callLLMProxy(
   maxTokens = 2000
 ): Promise<string> {
   try {
-    const result = await generateAICallable({
-      provider,
-      prompt,
-      systemPrompt,
-      maxTokens,
+    const token = await auth.currentUser?.getIdToken();
+    if (!token) throw new Error('ต้องเข้าสู่ระบบก่อนเรียกใช้งาน AI');
+    const res = await fetch(`${API_BASE}/api/ai`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ provider, prompt, systemPrompt, maxTokens }),
     });
-    return (result.data as string) || 'ไม่สามารถทำนายได้';
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `AI error ${res.status}`);
+    return (data.text as string) || 'ไม่สามารถทำนายได้';
   } catch (error: any) {
     console.error(`[AI Proxy] ${provider} error:`, error);
-    // Fallback message (ไม่เปิดเผยรายละเอียด)
     throw new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ AI กรุณาลองใหม่');
   }
 }
